@@ -1,0 +1,201 @@
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+" The following are examples of different formats supported.
+" （ここは入力例なので略
+" Unite
+Plugin 'shougo/unite.vim'
+" LSP
+Plugin 'neoclide/coc.nvim'
+"Plugin 'prabirshrestha/asyncomplete.vim'
+"Plugin 'prabirshrestha/asyncomplete-lsp.vim'
+"Plugin 'prabirshrestha/vim-lsp'
+"Plugin 'prabirshrestha/async.vim'
+"Plugin 'mattn/vim-lsp-settings'
+"Plugin 'mattn/vim-lsp-icons'
+"Vue
+Plugin 'posva/vim-vue'
+"indentline
+Plugin 'Yggdroot/indentLine'
+"PythonSyntaxHighlight
+Plugin 'davidhalter/jedi-vim'
+Plugin 'hdima/python-syntax'
+"icon
+Plugin 'ryanoasis/vim-devicons'
+"CloseTag
+Plugin 'alvan/vim-closetag'
+" Airline
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+"filer
+Plugin 'shougo/vimfiler.vim'
+"color
+Plugin 'morhetz/gruvbox'
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+
+au BufRead,BufNewFile *.py set filetype=python
+let hs_allow_hash_operator = 1
+syntax enable
+colorscheme gruvbox
+set bg=dark
+
+cmap w!! w !sudo tee > /dev/null %
+
+set langmenu=en_US.UTF-8 "system lang
+language messages en_US.UTF-8
+"vimfiler
+let g:vimfiler_as_default_explorer = 1
+nnoremap <C-f> :VimFiler<CR>
+inoremap <C-f> <ESC>:VimFiler<CR>
+
+"mute beep
+set vb t_vb=
+set encoding=utf-8
+scriptencoding utf-8
+set noshowmode "メッセージの被りをなくす
+
+set ttimeoutlen=50
+set virtualedit=block "C-vの矩形選択で行末より後ろもカーソルを置ける
+set fileencoding=utf-8 " 保存時の文字コード
+set fileencodings=ucs-boms,utf-8,euc-jp,cp932 " 読み込み時の文字コードの自動判別. 左側が優先される
+set fileformats=unix,dos,mac " 改行コードの自動判別. 左側が優先される
+set expandtab " タブ入力を複数の空白入力に置き換える
+set tabstop=2 " 画面上でタブ文字が占める幅
+set softtabstop=2 " 連続した空白に対してタブキーやバックスペースキーでカーソルが動く幅
+set autoindent " 改行時に前の行のインデントを継続する
+set smartindent " 改行時に前の行の構文をチェックし次の行のインデントを増減する
+set shiftwidth=2 " smartindentで増減する幅
+
+set incsearch " インクリメンタルサーチ. １文字入力毎に検索を行う
+set ignorecase " 検索パターンに大文字小文字を区別しない
+set smartcase " 検索パターンに大文字を含んでいたら大文字小文字を区別する
+set hlsearch " 検索結果をハイライト
+
+" 補完表示時のEnterで改行をしない
+inoremap <expr><CR>  pumvisible() ? "<C-y>" : "<CR>"
+set completeopt=menuone,noinsert
+
+" ESCキー2度押しでハイライトの切り替え
+nnoremap <silent><Esc><Esc> :<C-u>set nohlsearch!<CR>
+
+set whichwrap=b,s,h,l,<,>,[,],~ " カーソルの左右移動で行末から次の行の行頭への移動が可能になる
+set number " 行番号を表示
+set cursorline " カーソルラインをハイライト
+
+" 行が折り返し表示されていた場合、行単位ではなく表示行単位でカーソルを移動する
+nnoremap j gj
+nnoremap k gk
+nnoremap <down> gj
+nnoremap <up> gk
+nnoremap x "_x
+inoremap jj <Esc> " jjでNORNALモード
+
+" " バックスペースキーの有効化
+set backspace=indent,eol,start
+
+set showmatch " 括弧の対応関係を一瞬表示する
+source $VIMRUNTIME/macros/matchit.vim " Vimの「%」を拡張する
+
+set wildmenu " コマンドモードの補完
+set history=5000 " 保存するコマンド履歴の数
+
+let lsp_signature_help_enabled = 0
+"Paste Settings
+if &term =~ "xterm"
+  let &t_SI .= "\e[?2004h"
+  let &t_EI .= "\e[?2004l"
+  let &pastetoggle = "\e[201~"
+
+  function XTermPasteBegin(ret)
+  set paste
+  return a:ret
+  endfunction
+
+  inoremap <special> <expr> <Esc>[200~ XTermPasteBegin("")
+endif                                         
+
+"Backgroud Opacity
+highlight Normal ctermbg=none
+highlight NonText ctermbg=none
+highlight LineNr ctermbg=none
+highlight Folded ctermbg=none
+highlight EndOfBuffer ctermbg=none 
+
+set scrolloff=30
+
+"airline
+let g:airline#extensions#tabline#enabled = 1           " enable airline tabline                                                           
+nmap <C-p> <Plug>AirlineSelectPrevTab
+nmap <C-n> <Plug>AirlineSelectNextTab
+
+let g:airline_theme='gruvbox'                                                                                                             
+let g:airline_powerline_fonts = 1                                                                                                         
+let g:airline_section_b = '%{getcwd()}' " in section B of the status line display the CWD                                                 
+                                                                                                                                          
+set laststatus=2
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#whitespace#mixed_indent_algo = 1
+let g:airline#extensions#default#layout = [
+  \ [ 'a', 'b', 'c' ],
+  \ [ 'x', 'y', 'z']
+  \ ]
+
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+
+
+" powerline symbols
+" let g:airline_left_sep = ''
+" let g:airline_left_alt_sep = ''
+" let g:airline_right_sep = ''
+" let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+" let g:airline_symbols.readonly = ''
+" let g:airline_symbols.linenr = ''
+
+"let g:airline_right_sep = ''
+"let g:airline_right_alt_sep = ''
+
+" coc prettier
+command! -nargs=0 Format :call CocAction('format')
+
+let g:closetag_filenames = '*.html,*.xhtml,*.phtml, *.css, *.scss, *.vue'
+let g:indentLine_char = '┊'
+
+set nowritebackup
+set nobackup
+set noswapfile
+
+" syntax highlight
+autocmd FileType * call <SID>def_base_syntax() " autocmd Syntax may be better
+function! s:def_base_syntax()
+  " Simple example
+  syntax match Exception "\(+\|=\|-\|\^\|\*\)"
+  syntax match baseDelimiter ","
+  hi link commonOperator Operator
+endfunction
