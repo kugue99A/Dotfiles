@@ -1,16 +1,11 @@
-#local
-set -x PATH /usr/local/bin:$PATH
+alias vim 'nvim'
 
-## vi mode
-fish_vi_key_bindings
-
-# vi modeではなんか[I]みたいなの出るからオーバーライド
-function fish_mode_prompt 
-end
+# cargo
+set -gx PATH $HOME/.cargo/bin $PATH
 
 # pyenv
-set -Ux PYENV_ROOT $HOME/.pyenv
-set -U fish_user_paths $PYENV_ROOT/bin $fish_user_paths
+set -gx PYENV_ROOT $HOME/.pyenv
+set -g fish_user_paths $PYENV_ROOT/bin $fish_user_paths
 status is-login; and pyenv init --path | source
 pyenv init - | source
 
@@ -19,14 +14,6 @@ set -x GOENV_ROOT $HOME/.goenv
 set -x PATH $GOENV_ROOT/bin $PATH
 . (goenv init - | source)
 set -x PATH $GOPATH/bin $PATH
-
-# oh-my-fish theme
-fish_vi_key_bindings
-set -g theme_display_vi yes
-set -g theme_display_git_master_branch yes
-set -g theme_color_scheme gruvbox
-set -g theme_display_docker_machine yes
-set -g theme_display_ruby no
 
 # color
 set fish_color_normal         EBDBB2 
@@ -55,8 +42,6 @@ function cd
   ls
 end
 
-sh "$HOME/.vim/bundle/gruvbox/gruvbox_256palette.sh"
-
 #rbenv
 set -x PATH $HOME/.rbenv/bin $PATH
 status --is-interactive; and source (rbenv init -|psub)
@@ -72,5 +57,10 @@ end
 
 alias ls 'exa'
 alias la 'exa -l'
+alias restart-docker 'killall Docker && open /Applications/Docker.app'
 
-fish_vi_key_bindings
+set -x PATH $HOME/fvm/default/bin $PATH
+
+# GrADS
+set -x PATH /Applications/OpenGrADS $PATH
+
