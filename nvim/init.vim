@@ -2,10 +2,6 @@
 " ---------------------------------------------------------------------
 call plug#begin('~/.config/nvim/plugged')
 
-Plug 'neovim/nvim-lspconfig'
-
-Plug 'williamboman/nvim-lsp-installer'
-
 Plug 'nvim-lualine/lualine.nvim'
 
 Plug 'kyazdani42/nvim-web-devicons'
@@ -14,23 +10,9 @@ Plug 'kristijanhusak/defx-icons'
 
 Plug 'kristijanhusak/defx-git'
 
-Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
-
-Plug 'alampros/vim-styled-jsx'
-
-Plug 'maxmellon/vim-jsx-pretty'
-
-Plug 'chemzqm/vim-jsx-improve'
-
-Plug 'jparise/vim-graphql'
-
-Plug 'pantharshit00/vim-prisma'
-
-Plug 'leafOfTree/vim-vue-plugin'
-
-Plug 'mattn/emmet-vim'
-
 Plug 'neovim/nvim-lspconfig'
+
+Plug 'williamboman/nvim-lsp-installer'
 
 Plug 'hrsh7th/nvim-cmp'
 
@@ -42,6 +24,12 @@ Plug 'hrsh7th/cmp-buffer'
 
 Plug 'hrsh7th/vim-vsnip'
 
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+Plug 'maxmellon/vim-jsx-pretty'
+
+Plug 'dense-analysis/ale'
+
 if has('nvim')
   Plug 'Shougo/defx.nvim', { 'do': ':UpdateRemotePlugins' }
 else
@@ -52,9 +40,9 @@ endif
 
 call plug#end()
 
-
 "}}}
 
+syntax on
 set number
 set cursorline
 set nobackup
@@ -62,14 +50,8 @@ set noswapfile
 set scrolloff=30
 
 set termguicolors
-if filereadable(expand("/Users/99a/.config/nvim/colors/gruvbox.vim"))
-  colorscheme gruvbox
-endif
 set background=dark
-
-set list
-"set listchars=tab:»-┊,trail:┊,eol:↲,extends:»,precedes:«,nbsp:%
-
+colorscheme iceberg
 
 set whichwrap=b,s,h,l,<,>,[,],~
 nnoremap j gj
@@ -117,8 +99,8 @@ require'lualine'.setup{
         component_separators = {left = ' ', right = ''},
         section_separators = {left = '', right = ''},
         buffers_color = {
-          active = { bg = '#ebdbb2', fg = '#282828' },
-          inactive = { bg = '#282828', fg = '#ebdbb2' },
+          active = { bg = '#dcdfe7', fg = '#282828' },
+          inactive = { bg = '#282828', fg = '#dcdfe7' },
         },
       }
     },
@@ -130,6 +112,7 @@ require'lualine'.setup{
     },
 }
 EOF
+
 
 " Move to previous/next
 nnoremap <C-p> :bprevious<CR>
@@ -238,8 +221,19 @@ call defx#custom#option('_', {
       \ 'show_ignored_files': 1,
       \ 'buffer_name': 'exlorer',
       \ 'toggle': 1,
-      \ 'columns': 'indent:icons:filename:mark',
+      \ 'columns': 'indent:git: :icons:filename:mark',
       \ })
+
+call defx#custom#column('git', 'indicators', {
+  \ 'Modified'  : '✹ ',
+  \ 'Staged'    : '✚ ',
+  \ 'Untracked' : '✭ ',
+  \ 'Renamed'   : '➜ ',
+  \ 'Unmerged'  : '═ ',
+  \ 'Ignored'   : '☒ ',
+  \ 'Deleted'   : '✖ ',
+  \ 'Unknown'   : '? '
+  \ })
 
 let g:defx_icons_enable_syntax_highlight = 1
 let g:defx_icons_column_length = 2
@@ -310,3 +304,41 @@ cmp.setup({
   })
 })
 EOF
+
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = {
+    'c', 'cpp', 'dart', 'go', 'html', 'java', 'javascript', 'python', 'ruby',
+    'rust', 'typescript', 'vue'
+  },
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = true
+  },
+  indent = {
+    enable = true,
+  }
+}
+EOF
+
+" alt settings
+let g:ale_fixers = {
+\   'typescript': ['prettier'],
+\   'typescriptreact': ['prettier'],
+\   'javascript': ['prettier'],
+\   'javascriptreact': ['prettier'],
+\   'css': ['stylelint'],
+\   'scss': ['stylelint'],
+\}
+
+let g:ale_sign_error = 'P>'
+let g:ale_sign_warning = 'P-'
+let g:ale_echo_msg_format = '[%linter%] %code: %%s'
+let g:ale_statusline_format = ['E%d', 'W%d', 'OK']
+
+nmap <silent> <C-w>j <Plug>(ale_next_wrap)
+nmap <silent> <C-w>k <Plug>(ale_previous_wrap)
+
+let g:ale_fix_on_save = 1
+let g:ale_javascript_prettier_use_local_config = 1
+let g:ale_javascript_prettier_options = '--single-quote --trailing-comma all'
