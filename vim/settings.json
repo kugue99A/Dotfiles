@@ -1,0 +1,69 @@
+{
+  "editor.accessibilitySupport": "off",
+  "editor.fontFamily": "SauceCodePro Nerd Font Mono",
+  "terminal.integrated.env.osx": {
+    "FIG_NEW_SESSION": "1"
+  },
+  "terminal.integrated.fontFamily": "SauceCodePro Nerd Font Mono",
+  "workbench.colorTheme": "Gruvbox Material Dark",
+  "go.toolsManagement.autoUpdate": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.prettier": true,
+      "source.fixAll.eslint": true
+    }
+  },
+  "[vue]": {
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true,
+      "source.fixAll.stylelint": true
+    }
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.prettier": true,
+      "source.fixAll.stylelint": true
+    }
+  },
+  "[scss]": {
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.stylelint": true
+    }
+  },
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.useSystemClipboard": true,
+  "vim.hlsearch": true,
+  "backgroundCover.randomImageFolder": "/Users/yohei.kugue/Pictures/WallPaper",
+  "backgroundCover.imagePath": "/Users/yohei.kugue/Pictures/WallPaper/yousef-espanioly-jtKlXesSCro-unsplash.jpg",
+  "backgroundCover.opacity": 0.3,
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "git.enableSmartCommit": true
+}
