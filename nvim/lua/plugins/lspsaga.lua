@@ -8,7 +8,7 @@ return {
   config = function()
     require("lspsaga").setup({
       ui = {
-        title = false,
+        title = true,
         border = "single",
       },
       symbol_in_winbar = {
@@ -29,7 +29,6 @@ return {
     -- If there is no definition, it will instead be hidden
     -- When you use an action in finder like "open vsplit",
     -- you can use <C-t> to jump back
-    keymap("n", "gh", "<cmd>Lspsaga finder<CR>")
 
     keymap({ "n", "v" }, "ga", "<cmd>Lspsaga code_action<CR>")
 
@@ -78,7 +77,11 @@ return {
     -- Note that if you use hover with ++keep, pressing this key again will
     -- close the hover window. If you want to jump to the hover window
     -- you should use the wincmd command "<C-w>w"
-    keymap("n", "K", "<cmd>Lspsaga hover_doc ++keep<CR>")
+    keymap("n", "gh",  "<cmd>Lspsaga hover_doc<CR>")
+    keymap('n', 'gf', '<cmd>Lspsaga finder def+ref<CR>')
+    keymap("n", "gd", "<cmd>Lspsaga peek_definition<CR>")
+    keymap("n", "ga", "<cmd>Lspsaga code_action<CR>")
+    keymap("n", "gr", "<cmd>Lspsaga rename<CR>")
 
     -- Call hierarchy
     keymap("n", "<Leader>ci", "<cmd>Lspsaga incoming_calls<CR>")
