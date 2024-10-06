@@ -33,19 +33,19 @@ return {
 					padding = 1, -- extra padding on left hand side
 					-- indent guides
 					with_markers = true,
-					indent_marker = "│",
-					last_indent_marker = "└",
+					indent_marker = "‚îÇ",
+					last_indent_marker = "‚îî",
 					highlight = "NeoTreeIndentMarker",
 					-- expander config, needed for nesting files
 					with_expanders = nil, -- if nil and file nesting is enabled, will enable expanders
-					expander_collapsed = "",
-					expander_expanded = "",
+					expander_collapsed = "Ôë†",
+					expander_expanded = "Ôëº",
 					expander_highlight = "NeoTreeExpander",
 				},
 				icon = {
-					folder_closed = "",
-					folder_open = "",
-					folder_empty = "",
+					folder_closed = "Óóø",
+					folder_open = "Óóæ",
+					folder_empty = "Óóæ",
 					-- The next two settings are only a fallback, if you use nvim-web-devicons and configure default icons there
 					-- then these will never be used.
 					default = "*",
@@ -63,16 +63,16 @@ return {
 				git_status = {
 					symbols = {
 						-- Change type
-						added = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
-						modified = "", -- or "", but this is redundant info if you use git_status_colors on the name
-						deleted = "✖", -- this can only be used in the git_status source
-						renamed = "󰁕", -- this can only be used in the git_status source
+						added = "", -- or "‚úö", but this is redundant info if you use git_status_colors on the name
+						modified = "", -- or "ÔëÑ", but this is redundant info if you use git_status_colors on the name
+						deleted = "‚úñ", -- this can only be used in the git_status source
+						renamed = "Û∞Åï", -- this can only be used in the git_status source
 						-- Status type
-						untracked = "",
-						ignored = "",
-						unstaged = "󰄱",
-						staged = "",
-						conflict = "",
+						untracked = "ÔÑ®",
+						ignored = "Ôë¥",
+						unstaged = "Û∞Ñ±",
+						staged = "ÔÅÜ",
+						conflict = "Óúß",
 					},
 				},
 				-- If you don't want to use these columns, you can set `enabled = false` for each of them individually
@@ -165,9 +165,9 @@ return {
 			filesystem = {
 				filtered_items = {
 					visible = false, -- when true, they will just be displayed differently than normal items
-					hide_dotfiles = true,
-					hide_gitignored = true,
-					hide_hidden = true, -- only works on Windows for hidden files/directories
+					hide_dotfiles = false,
+					hide_gitignored = false,
+					hide_hidden = false, -- only works on Windows for hidden files/directories
 					hide_by_name = {
 						--"node_modules"
 					},
@@ -246,7 +246,7 @@ return {
 				show_unloaded = true,
 				window = {
 					mappings = {
-						["bd"] = "buffer_delete",
+						["d"] = "buffer_delete",
 						["<bs>"] = "navigate_up",
 						["."] = "set_root",
 						["o"] = { "show_help", nowait = false, config = { title = "Order by", prefix_key = "o" } },
