@@ -11,7 +11,7 @@ return {
 		"fdschmidt93/telescope-egrepify.nvim",
 	},
 	keys = {
-		{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "search [F]iles" },
+		{ "<leader>ff", "<cmd>Telescope find_files hidden=true<cr>", desc = "search [F]iles" },
 	},
 	config = function()
 		local builtin = require("telescope.builtin")
@@ -26,6 +26,16 @@ return {
 					n = { ["q"] = actions.close },
 				},
 				layout_strategy = "vertical",
+				vimgrep_arguments = {
+					"rg",
+					"--color=never",
+					"--no-heading",
+					"--with-filename",
+					"--line-number",
+					"--column",
+					"--smart-case",
+					"--hidden", -- 隠しファイルを含める
+				},
 			},
 		})
 		vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
