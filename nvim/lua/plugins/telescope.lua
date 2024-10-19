@@ -4,7 +4,6 @@ return {
 	cmd = {
 		"Telescope",
 	},
-	event = { "VimEnter", "BufReadPre", "BufNewFile" },
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
