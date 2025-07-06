@@ -1,0 +1,48 @@
+if status is-interactive
+  set fish_greeting
+  # Commands to run in interactive sessions can go here
+  ############################
+  #alias
+  ############################
+  alias vim "nvim"
+  alias vi "nvim"
+  alias ls "lsd"
+
+  ############################
+  #paths
+  ############################
+  eval (/opt/homebrew/bin/brew shellenv)
+  pyenv init - | source
+
+  # zoxide
+  zoxide init fish | source
+
+  # go
+  set -x GOPATH $HOME/go
+  set -x GOBIN $GOPATH/bin
+  set -x PATH $PATH:$GOBIN
+
+  set fish_term256 1
+
+  #cd + ls
+  function cd
+    builtin cd $argv[1]
+    ls
+  end
+
+  set fish_plugins theme peco
+
+  function fish_user_key_bindings
+    bind \^r peco_select_history # Bind for prco history to Ctrl+r
+  end
+
+  # starship
+  starship init fish | source
+
+  # lazygit
+  set -x XDG_CONFIG_HOME "$HOME/.config"
+end
+
+# Setting PATH for Python 3.11
+# The original version is saved in /Users/yoheikugue/.config/fish/config.fish.pysave
+set -x PATH "/Library/Frameworks/Python.framework/Versions/3.11/bin" "$PATH"

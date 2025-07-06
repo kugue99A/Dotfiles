@@ -1,0 +1,29 @@
+# API Keys and secrets
+*.env
+.env*
+**/config.fish.backup
+**/*backup*
+
+# Sensitive configuration files
+**/fish_variables
+**/.secrets
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+.tmp/
