@@ -1,0 +1,213 @@
+#!/bin/bash
+
+# Dotfiles Management Script - Terraform-like Interface
+# Usage: ./dotfiles [plan|apply|destroy|status]
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$SCRIPT_DIR/macos/.config"
+CONFIG_DIR="$HOME/.config"
+BACKUP_DIR="$HOME/.config.backup/$(date +%Y%m%d_%H%M%S)"
+STATE_FILE="$SCRIPT_DIR/.dotfiles_state"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Logging functions
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+# Function to check if a path is managed by nix
+is_nix_managed() {
+    local path="$1"
+    [[ -L "$path" && $(readlink "$path") == /nix/store/* ]]
+}
+
+# Function to get all config files/directories
+get_config_items() {
+    find "$DOTFILES_DIR" -mindepth 1 -maxdepth 1 -type d -o -type f | while read -r item; do
+        basename "$item"
+    done
+}
+
+# Function to plan changes
+plan() {
+    log_info "Planning dotfiles changes..."
+    
+    local changes_found=false
+    
+    mkdir -p "$CONFIG_DIR"
+    
+    get_config_items | while read -r item; do
+        local source_path="$DOTFILES_DIR/$item"
+        local target_path="$CONFIG_DIR/$item"
+        
+        # Skip if managed by nix
+        if is_nix_managed "$target_path"; then
+            log_warning "Skipping $item (managed by nix)"
+            continue
+        fi
+        
+        if [[ -L "$target_path" ]]; then
+            local current_target=$(readlink "$target_path")
+            if [[ "$current_target" != "$source_path" ]]; then
+                echo "~ $item: symlink will be updated"
+                changes_found=true
+            fi
+        elif [[ -e "$target_path" ]]; then
+            echo "+ $item: will be backed up and symlinked"
+            changes_found=true
+        else
+            echo "+ $item: will be symlinked"
+            changes_found=true
+        fi
+    done
+    
+    if [[ "$changes_found" != true ]]; then
+        log_info "No changes required."
+    fi
+}
+
+# Function to apply changes
+apply() {
+    log_info "Applying dotfiles changes..."
+    
+    # Create backup directory if needed
+    local backup_created=false
+    
+    get_config_items | while read -r item; do
+        local source_path="$DOTFILES_DIR/$item"
+        local target_path="$CONFIG_DIR/$item"
+        
+        # Skip if managed by nix
+        if is_nix_managed "$target_path"; then
+            log_warning "Skipping $item (managed by nix)"
+            continue
+        fi
+        
+        # Create backup if target exists and is not already a symlink to our source
+        if [[ -e "$target_path" && ! (-L "$target_path" && $(readlink "$target_path") == "$source_path") ]]; then
+            if [[ "$backup_created" != true ]]; then
+                mkdir -p "$BACKUP_DIR"
+                backup_created=true
+                log_info "Created backup directory: $BACKUP_DIR"
+            fi
+            
+            mv "$target_path" "$BACKUP_DIR/$item"
+            log_success "Backed up $item"
+        fi
+        
+        # Remove existing symlink if it points elsewhere
+        if [[ -L "$target_path" ]]; then
+            rm "$target_path"
+        fi
+        
+        # Create symlink
+        ln -sf "$source_path" "$target_path"
+        log_success "Symlinked $item"
+    done
+    
+    # Update state file
+    echo "applied_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$STATE_FILE"
+    echo "backup_dir=$BACKUP_DIR" >> "$STATE_FILE"
+    
+    log_success "Dotfiles applied successfully!"
+}
+
+# Function to destroy symlinks
+destroy() {
+    log_info "Destroying dotfiles symlinks..."
+    
+    get_config_items | while read -r item; do
+        local target_path="$CONFIG_DIR/$item"
+        
+        # Skip if managed by nix
+        if is_nix_managed "$target_path"; then
+            log_warning "Skipping $item (managed by nix)"
+            continue
+        fi
+        
+        if [[ -L "$target_path" ]]; then
+            local link_target=$(readlink "$target_path")
+            if [[ "$link_target" == "$DOTFILES_DIR/$item" ]]; then
+                rm "$target_path"
+                log_success "Removed symlink for $item"
+            else
+                log_warning "Skipping $item (not managed by this script)"
+            fi
+        fi
+    done
+    
+    # Clear state file
+    rm -f "$STATE_FILE"
+    
+    log_success "Dotfiles symlinks destroyed!"
+}
+
+# Function to show status
+status() {
+    log_info "Dotfiles status:"
+    
+    if [[ -f "$STATE_FILE" ]]; then
+        echo "State file: $STATE_FILE"
+        cat "$STATE_FILE"
+        echo
+    fi
+    
+    get_config_items | while read -r item; do
+        local source_path="$DOTFILES_DIR/$item"
+        local target_path="$CONFIG_DIR/$item"
+        
+        if is_nix_managed "$target_path"; then
+            echo "  $item: managed by nix"
+        elif [[ -L "$target_path" ]]; then
+            local link_target=$(readlink "$target_path")
+            if [[ "$link_target" == "$source_path" ]]; then
+                echo "  $item: ✓ symlinked"
+            else
+                echo "  $item: ⚠ symlinked to $link_target"
+            fi
+        elif [[ -e "$target_path" ]]; then
+            echo "  $item: ✗ exists but not symlinked"
+        else
+            echo "  $item: ✗ not linked"
+        fi
+    done
+}
+
+# Main function
+main() {
+    case "${1:-}" in
+        plan)
+            plan
+            ;;
+        apply)
+            apply
+            ;;
+        destroy)
+            destroy
+            ;;
+        status)
+            status
+            ;;
+        *)
+            echo "Usage: $0 {plan|apply|destroy|status}"
+            echo
+            echo "Commands:"
+            echo "  plan     - Show what changes would be made"
+            echo "  apply    - Apply dotfiles configuration"
+            echo "  destroy  - Remove dotfiles symlinks"
+            echo "  status   - Show current status"
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
