@@ -1,0 +1,244 @@
+// Zellij configuration to mimic tmux settings
+keybinds clear-defaults=true {
+    normal {
+        // Prefix key is Ctrl q
+        bind "Ctrl q" { SwitchToMode "tmux"; }
+    }
+    tmux {
+        // Pane navigation with vim keys
+        bind "h" { MoveFocus "left"; SwitchToMode "normal"; }
+        bind "j" { MoveFocus "down"; SwitchToMode "normal"; }
+        bind "k" { MoveFocus "up"; SwitchToMode "normal"; }
+        bind "l" { MoveFocus "right"; SwitchToMode "normal"; }
+        
+        // Pane resizing with vim keys (capital letters)
+        bind "H" { Resize "Increase left"; }
+        bind "J" { Resize "Increase down"; }
+        bind "K" { Resize "Increase up"; }
+        bind "L" { Resize "Increase right"; }
+        
+        // Pane splitting
+        bind "s" { NewPane "down"; SwitchToMode "normal"; }  // horizontal split
+        bind "v" { NewPane "right"; SwitchToMode "normal"; } // vertical split
+        
+        // Window navigation
+        bind "p" { GoToPreviousTab; SwitchToMode "normal"; }
+        bind "n" { GoToNextTab; SwitchToMode "normal"; }
+        
+        // Closing panes and windows
+        bind "x" { CloseFocus; SwitchToMode "normal"; }     // kill pane
+        bind "X" { CloseTab; SwitchToMode "normal"; }       // kill window
+        
+        // Exit tmux mode
+        bind "Ctrl q" { SwitchToMode "normal"; }
+        bind "esc" { SwitchToMode "normal"; }
+        
+        // Additional tmux-like bindings
+        bind "c" { NewTab; SwitchToMode "normal"; }         // new window
+        bind "[" { SwitchToMode "scroll"; }                 // enter scroll mode
+        bind "z" { ToggleFocusFullscreen; SwitchToMode "normal"; } // zoom pane
+        bind "d" { Detach; }                                 // detach session
+        
+        // Tab rename
+        bind "r" { SwitchToMode "renametab"; TabNameInput 0; }
+        
+        // Window number shortcuts
+        bind "1" { GoToTab 1; SwitchToMode "normal"; }
+        bind "2" { GoToTab 2; SwitchToMode "normal"; }
+        bind "3" { GoToTab 3; SwitchToMode "normal"; }
+        bind "4" { GoToTab 4; SwitchToMode "normal"; }
+        bind "5" { GoToTab 5; SwitchToMode "normal"; }
+        bind "6" { GoToTab 6; SwitchToMode "normal"; }
+        bind "7" { GoToTab 7; SwitchToMode "normal"; }
+        bind "8" { GoToTab 8; SwitchToMode "normal"; }
+        bind "9" { GoToTab 9; SwitchToMode "normal"; }
+    }
+    scroll {
+        // Vi-like scrolling
+        bind "j" { ScrollDown; }
+        bind "k" { ScrollUp; }
+        bind "h" { PageScrollUp; }
+        bind "l" { PageScrollDown; }
+        bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "Ctrl b" { PageScrollUp; }
+        bind "Ctrl f" { PageScrollDown; }
+        bind "g" { ScrollToTop; }
+        bind "G" { ScrollToBottom; }
+        bind "PageDown" { PageScrollDown; }
+        bind "PageUp" { PageScrollUp; }
+        
+        // Copy functionality
+        bind "y" { Copy; }  // Copy selection if any
+        
+        // Exit scroll mode
+        bind "esc" { SwitchToMode "normal"; }
+        bind "q" { SwitchToMode "normal"; }
+        bind "Ctrl c" { ScrollToBottom; SwitchToMode "normal"; }
+        
+        // Search in scroll mode
+        bind "/" { SwitchToMode "entersearch"; SearchInput 0; }
+    }
+    search {
+        bind "n" { Search "down"; }
+        bind "N" { Search "up"; }
+        bind "esc" { SwitchToMode "scroll"; }
+        bind "Ctrl c" { SwitchToMode "normal"; }
+    }
+    entersearch {
+        bind "enter" { SwitchToMode "search"; }
+        bind "esc" { SwitchToMode "scroll"; }
+        bind "Ctrl c" { SwitchToMode "normal"; }
+    }
+    resize {
+        bind "h" { Resize "Increase left"; }
+        bind "j" { Resize "Increase down"; }
+        bind "k" { Resize "Increase up"; }
+        bind "l" { Resize "Increase right"; }
+        bind "H" { Resize "Decrease left"; }
+        bind "J" { Resize "Decrease down"; }
+        bind "K" { Resize "Decrease up"; }
+        bind "L" { Resize "Decrease right"; }
+        bind "esc" { SwitchToMode "normal"; }
+        bind "enter" { SwitchToMode "normal"; }
+    }
+    locked {
+        // bind "Ctrl g" { SwitchToMode "normal"; }  // disabled
+    }
+    pane {
+        bind "h" { MoveFocus "left"; }
+        bind "j" { MoveFocus "down"; }
+        bind "k" { MoveFocus "up"; }
+        bind "l" { MoveFocus "right"; }
+        bind "p" { SwitchFocus; }
+        bind "x" { CloseFocus; SwitchToMode "normal"; }
+        bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
+        bind "w" { ToggleFloatingPanes; SwitchToMode "normal"; }
+        bind "e" { TogglePaneEmbedOrFloating; SwitchToMode "normal"; }
+        bind "esc" { SwitchToMode "normal"; }
+    }
+    tab {
+        bind "h" { GoToPreviousTab; }
+        bind "l" { GoToNextTab; }
+        bind "n" { NewTab; SwitchToMode "normal"; }
+        bind "x" { CloseTab; SwitchToMode "normal"; }
+        bind "r" { SwitchToMode "renametab"; TabNameInput 0; }
+        bind "esc" { SwitchToMode "normal"; }
+    }
+    renametab {
+        bind "esc" { UndoRenameTab; SwitchToMode "tab"; }
+        bind "enter" { SwitchToMode "normal"; }
+        bind "Ctrl c" { SwitchToMode "normal"; }
+    }
+    renamepane {
+        bind "esc" { UndoRenamePane; SwitchToMode "pane"; }
+        bind "enter" { SwitchToMode "normal"; }
+        bind "Ctrl c" { SwitchToMode "normal"; }
+    }
+    session {
+        bind "d" { Detach; }
+        bind "esc" { SwitchToMode "normal"; }
+        // bind "Ctrl o" { SwitchToMode "normal"; }  // disabled
+    }
+    move {
+        bind "h" { MovePane "left"; }
+        bind "j" { MovePane "down"; }
+        bind "k" { MovePane "up"; }
+        bind "l" { MovePane "right"; }
+        bind "esc" { SwitchToMode "normal"; }
+    }
+    // Global shortcuts that work in most modes
+    shared_except "locked" {
+        // bind "Ctrl g" { SwitchToMode "locked"; }  // disabled
+        bind "Alt h" { MoveFocusOrTab "left"; }
+        bind "Alt j" { MoveFocus "down"; }
+        bind "Alt k" { MoveFocus "up"; }
+        bind "Alt l" { MoveFocusOrTab "right"; }
+        bind "Alt n" { NewPane; }
+        bind "Alt +" { Resize "Increase"; }
+        bind "Alt -" { Resize "Decrease"; }
+        bind "Alt [" { PreviousSwapLayout; }
+        bind "Alt ]" { NextSwapLayout; }
+    }
+    shared_except "locked" "scroll" "search" {
+        // bind "Ctrl s" { SwitchToMode "scroll"; }
+    }
+    shared_except "locked" "resize" {
+        // bind "Ctrl n" { SwitchToMode "resize"; }  // disabled
+    }
+    shared_except "locked" "pane" {
+        // bind "Ctrl p" { SwitchToMode "pane"; }  // disabled
+    }
+    shared_except "locked" "tab" {
+        // bind "Ctrl t" { SwitchToMode "tab"; }
+    }
+    shared_except "locked" "session" {
+        // bind "Ctrl o" { SwitchToMode "session"; }  // disabled
+    }
+    shared_except "locked" "move" {
+        // bind "Ctrl h" { SwitchToMode "move"; }  // disabled
+    }
+}
+
+// Plugins configuration
+plugins {
+    tab-bar location="zellij:tab-bar"
+    status-bar location="zellij:status-bar"
+    strider location="zellij:strider"
+    compact-bar location="zellij:compact-bar"
+    session-manager location="zellij:session-manager"
+    welcome-screen location="zellij:session-manager" {
+        welcome_screen true
+    }
+    filepicker location="zellij:strider" {
+        cwd "/"
+    }
+}
+
+// UI Configuration
+theme "iceberg-dark"
+
+// Pane frames and borders configuration
+pane_frames true
+
+// Mouse support
+mouse_mode true
+
+// Default shell - set to fish as in your tmux config
+default_shell "/usr/local/bin/fish"
+
+// Status bar at the bottom
+default_layout "default"
+
+// Copy command for macOS
+copy_command "pbcopy"
+
+// Scrollback buffer size
+scroll_buffer_size 10000
+
+// Other configurations
+default_mode "normal"
+copy_on_select true
+scrollback_editor "/usr/bin/vim"
+
+// Session persistence
+session_serialization true
+serialize_pane_viewport false
+
+// Theme customization - Gruvbox Dark
+themes {
+    gruvbox-dark {
+        fg "#ebdbb2"      // fg
+        bg "#282828"      // bg0
+        black "#282828"   // bg0
+        red "#fb4934"     // red (bright)
+        green "#b8bb26"   // green (bright)
+        yellow "#fabd2f"  // yellow (bright)
+        blue "#83a598"    // blue (bright)
+        magenta "#d3869b" // purple (bright)
+        cyan "#8ec07c"    // aqua (bright)
+        white "#ebdbb2"   // fg
+        orange "#fe8019"  // orange (bright)
+    }
+}

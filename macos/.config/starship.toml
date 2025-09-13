@@ -1,0 +1,25 @@
+format = "$all$character"
+
+[character]
+error_symbol = "[➜](bold red)"
+success_symbol = "[➜](bold green)"
+vimcmd_symbol = "[➜](bold green)"
+
+[directory]
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = " "
+
+[golang]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[python]
+symbol = " "
+
+[rust]
+symbol = " "

@@ -1,0 +1,48 @@
+[tools]
+# Node.js - 最新のLTS版を使用
+nodejs = "lts"
+
+# Claude Code CLI - 常に最新版を取得
+claude-code = "latest"
+
+# 開発で使用する言語とツール
+go = "latest"
+python = "latest"
+rust = "latest"
+
+# 便利なCLIツール
+ripgrep = "latest"
+fd = "latest"
+bat = "latest"
+fzf = "latest"
+
+# Language Servers for Neovim
+# TypeScript Language Server via npm
+"npm:typescript-language-server" = "latest"
+"npm:typescript" = "latest"
+
+# Code Formatters and Linters
+# JavaScript/TypeScript formatters
+"npm:@biomejs/biome" = "latest"
+"npm:prettier" = "latest"
+"npm:eslint_d" = "latest"
+
+# CSS/SCSS formatters
+"npm:stylelint" = "latest"
+"npm:stylelint-config-standard" = "latest"
+
+# Python formatters
+"pip:black" = "latest"
+"pip:isort" = "latest"
+
+# Lua formatter  
+"cargo:stylua" = "latest"
+
+[env]
+# 共通の環境変数
+EDITOR = "nvim"
+VISUAL = "nvim"
+
+[settings]
+# 実験的機能を有効化
+experimental = true
