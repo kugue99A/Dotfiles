@@ -42,5 +42,6 @@
     jq
     curl
     wget
+    gnumake  # for Telescope fzf-native
   ];
 }
