@@ -99,9 +99,11 @@ The `./dotfiles` script implements:
 4. For system packages, add to appropriate Nix file in `home-manager/`
 
 ### LSP Server Setup (Neovim)
-1. Add server name to `lsp_servers` table in `init.lua`
-2. Create configuration file in `lsp/[server_name].lua`
+1. Create configuration file in `lua/lsp/[server_name].lua`
+2. Add server configuration to `lua/core/lsp.lua`
 3. System installation handled via Nix (`packages.nix`)
+
+**Important**: LSP configuration uses modern `vim.lsp.config` and `vim.lsp.enable` approach, not Mason. Individual server configs are in `lua/lsp/` directory.
 
 ### Theme and Visual Consistency
 - Use Gruvbox Dark color scheme across all applications
@@ -117,3 +119,42 @@ The `./dotfiles` script implements:
 - Manual configurations: Tracked via `.dotfiles_state`
 - Nix configurations: Managed via Home Manager generations
 - Plugin states: Neovim `lazy-lock.json`, Fish `fish_plugins`
+
+## Key Integration Features
+
+### Neovim Modern Architecture
+- Uses Lua-based configuration with modular structure
+- Core modules loaded from `lua/core/`: options, keymaps, lsp, highlights
+- Plugin management via lazy.nvim in `lua/plugins/`
+- LSP servers configured individually in `lua/lsp/` directory
+- Leader key: Space, Local leader: Backslash
+
+### Zellij Terminal Multiplexer
+- Prefix key: `Ctrl+q` (tmux-style workflow)
+- Vim-style pane navigation (hjkl keys)
+- Custom Gruvbox Dark theme integration
+- Session management with `.zellij` directory
+
+### Fish Shell Custom Functions
+Located in `fish/functions/`:
+- `ga.fish`, `gc.fish`, `gd.fish`, `gl.fish`, `gp.fish`, `gs.fish` - Git shortcuts
+- `vf.fish` - Fuzzy finder integration
+- `dedup_path.fish` - PATH management
+
+## Troubleshooting Common Issues
+
+### Neovim LSP Problems
+- Check `:LspInfo` for server status
+- Verify server installation in Nix `packages.nix`
+- Review server config in `lua/lsp/[server].lua`
+- Restart LSP: `:LspRestart`
+
+### Dotfiles Conflicts
+- Check for Nix-managed files: Files managed by Home Manager are automatically skipped
+- Review backup location: `~/.config.backup/TIMESTAMP/`
+- State conflicts: Check `.dotfiles_state` for tracking issues
+
+### Home Manager Issues
+- Channel updates: `nix-channel --update && home-manager switch`
+- Generation rollback: `home-manager generations` then activate specific generation
+- Detailed errors: `home-manager switch --show-trace`
