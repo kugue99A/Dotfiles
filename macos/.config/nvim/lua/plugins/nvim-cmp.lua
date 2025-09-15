@@ -1,7 +1,12 @@
 -- Autocompletion configuration with nvim-cmp
 return {
   "hrsh7th/nvim-cmp",
-  event = "InsertEnter",
+  event = { "InsertEnter", "CmdlineEnter" },
+  init = function()
+    -- Enable built-in command completion immediately
+    vim.o.wildmenu = true
+    vim.o.wildmode = "longest:full,full"
+  end,
   dependencies = {
     -- Completion sources
     "hrsh7th/cmp-nvim-lsp",     -- LSP completions
