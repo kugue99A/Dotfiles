@@ -1,5 +1,10 @@
 { pkgs, ... }:
 
+let
+  serena = pkgs.writeShellScriptBin "serena" ''
+    exec ${pkgs.nix}/bin/nix run github:oraios/serena -- "$@"
+  '';
+in
 {
   home.packages = with pkgs; [
     # Editor (without Home Manager configuration)
@@ -35,6 +40,8 @@
     rustc
     cargo
     python3
+    lua5_4
+    pkg-config
     
     # Other useful tools
     htop
@@ -43,5 +50,6 @@
     curl
     wget
     gnumake  # for Telescope fzf-native
+    serena  # Coding agent toolkit with semantic capabilities
   ];
 }
