@@ -9,6 +9,7 @@ claude-code = "latest"
 go = "latest"
 python = "latest"
 rust = "latest"
+lua = "latest"
 
 # 便利なCLIツール
 ripgrep = "latest"
@@ -31,7 +32,8 @@ fzf = "latest"
 "npm:stylelint" = "latest"
 "npm:stylelint-config-standard" = "latest"
 
-# Python formatters
+# Python formatters and package management
+uv = "latest"
 "pip:black" = "latest"
 "pip:isort" = "latest"
 
