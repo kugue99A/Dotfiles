@@ -89,7 +89,7 @@ return {
         ["a"] = {
           "add",
           config = {
-            show_path = "none",
+            show_path = "relative",
           },
         },
         ["A"] = "add_directory",
@@ -239,13 +239,6 @@ return {
       end,
     })
     
-    -- Fix modifiable issues with neo-tree
-    vim.api.nvim_create_autocmd("FileType", {
-      pattern = "neo-tree*",
-      callback = function()
-        vim.bo.modifiable = false
-      end,
-    })
     
     -- Custom highlights
     vim.api.nvim_set_hl(0, "NeoTreeDirectoryIcon", { fg = "#fe8019" })  -- Orange for directories
