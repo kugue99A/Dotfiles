@@ -8,6 +8,19 @@ end
 
 -- Auto command to set highlights after colorscheme changes
 local function apply_highlights()
+	-- Transparent background
+	set_hl("Normal", { bg = "NONE" })
+	set_hl("NormalNC", { bg = "NONE" })
+	set_hl("SignColumn", { bg = "NONE" })
+	set_hl("LineNr", { bg = "NONE" })
+	set_hl("Folded", { bg = "NONE" })
+	set_hl("EndOfBuffer", { bg = "NONE" })
+	
+	-- Transparent tabline/bufferline
+	set_hl("TabLine", { bg = "NONE" })
+	set_hl("TabLineFill", { bg = "NONE" })
+	set_hl("TabLineSel", { bg = "NONE" })
+
 	-- Enhanced cursor line
 	set_hl("CursorLineNr", { bold = true })
 
@@ -20,7 +33,7 @@ local function apply_highlights()
 
 	-- Float window borders
 	set_hl("FloatBorder", { fg = "#565f89", bg = "NONE" })
-	set_hl("NormalFloat", { bg = "#1a1b26" })
+	set_hl("NormalFloat", { bg = "NONE" })
 
 	-- Diagnostic highlights
 	set_hl("DiagnosticError", { fg = "#f7768e" })
