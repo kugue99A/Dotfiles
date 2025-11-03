@@ -12,6 +12,7 @@ in
     
     # Development tools
     git
+    gh  # GitHub CLI
     starship
     
     # Essential CLI tools
