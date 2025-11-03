@@ -172,6 +172,14 @@ vim.lsp.config.pyright = {
   },
 }
 
+-- TypeSpec Language Server
+vim.lsp.config.tsp_server = {
+  cmd = { "tsp-server", "--stdio" },
+  filetypes = { "typespec" },
+  root_markers = { "tspconfig.yaml", ".git" },
+  capabilities = get_capabilities(),
+}
+
 -- Deno Language Server (only when deno.json exists)
 vim.lsp.config.denols = {
   cmd = { "deno", "lsp" },
@@ -189,7 +197,8 @@ local servers_to_enable = {
   "gopls",
   "rust_analyzer", 
   "pyright",
-  "denols"
+  "denols",
+  "tsp_server"
 }
 
 for _, server in ipairs(servers_to_enable) do

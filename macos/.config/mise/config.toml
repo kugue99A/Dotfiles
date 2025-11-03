@@ -22,6 +22,9 @@ fzf = "latest"
 "npm:typescript-language-server" = "latest"
 "npm:typescript" = "latest"
 
+# TypeSpec Language Server
+"npm:@typespec/compiler" = "latest"
+
 # Code Formatters and Linters
 # JavaScript/TypeScript formatters
 "npm:@biomejs/biome" = "latest"
@@ -32,10 +35,8 @@ fzf = "latest"
 "npm:stylelint" = "latest"
 "npm:stylelint-config-standard" = "latest"
 
-# Python formatters and package management
+# Python package management
 uv = "latest"
-"pip:black" = "latest"
-"pip:isort" = "latest"
 
 # Lua formatter  
 "cargo:stylua" = "latest"
