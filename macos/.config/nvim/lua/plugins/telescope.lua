@@ -61,6 +61,25 @@ return {
   opts = function()
     local actions = require("telescope.actions")
     
+    -- jを2回連続で押したらTelescopeを閉じるカスタムアクション
+    local double_tap_j = (function()
+      local last_j_time = 0
+      local threshold = 300 -- ミリ秒以内に2回押す
+      
+      return function(prompt_bufnr)
+        local current_time = vim.loop.now()
+        if current_time - last_j_time < threshold then
+          -- 2回目のjが押された - Telescopeを閉じる
+          actions.close(prompt_bufnr)
+          last_j_time = 0
+        else
+          -- 1回目のjまたは時間切れ - 通常の動作（次の選択肢へ移動）
+          actions.move_selection_next(prompt_bufnr)
+          last_j_time = current_time
+        end
+      end
+    end)()
+    
     return {
       defaults = {
         prompt_prefix = " ",
@@ -101,7 +120,7 @@ return {
             ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
             ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
             ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-            ["j"] = actions.move_selection_next,
+            ["j"] = double_tap_j,
             ["k"] = actions.move_selection_previous,
             ["H"] = actions.move_to_top,
             ["M"] = actions.move_to_middle,
