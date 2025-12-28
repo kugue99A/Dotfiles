@@ -159,17 +159,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		-- Navigation
 		map("n", "gd", vim.lsp.buf.definition, "Go to definition")
 		map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
-		map("n", "gr", vim.lsp.buf.references, "Go to references")
+		map("n", "gf", vim.lsp.buf.references, "Find references")
 		map("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
 		map("n", "gt", vim.lsp.buf.type_definition, "Go to type definition")
 
-		-- Documentation
+		-- Documentation & Diagnostics
 		map("n", "K", vim.lsp.buf.hover, "Show hover documentation")
+		map("n", "gh", vim.diagnostic.open_float, "Show diagnostics hover")
 		map("n", "<C-k>", vim.lsp.buf.signature_help, "Show signature help")
 		map("i", "<C-k>", vim.lsp.buf.signature_help, "Show signature help")
 
-		-- Code actions
+		-- Code actions & Refactoring
 		map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code actions")
+		map("n", "gr", vim.lsp.buf.rename, "Rename symbol")
 		map("n", "<leader>rn", vim.lsp.buf.rename, "Rename symbol")
 
 		-- Formatting
