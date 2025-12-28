@@ -2,7 +2,11 @@
 return {
   "nvim-neo-tree/neo-tree.nvim",
   branch = "v3.x",
-  event = "VimEnter",
+  cmd = "Neotree",
+  keys = {
+    { "<leader>e", "<cmd>Neotree toggle<CR>", desc = "Explorer NeoTree" },
+    { "<leader>E", "<cmd>Neotree toggle float<CR>", desc = "Explorer NeoTree (float)" },
+  },
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-tree/nvim-web-devicons",
@@ -226,14 +230,19 @@ return {
   
   config = function(_, opts)
     require("neo-tree").setup(opts)
-    
-    -- Auto-close neo-tree when opening a file
+
+    -- Open neo-tree when opening a directory
     vim.api.nvim_create_autocmd("BufEnter", {
       group = vim.api.nvim_create_augroup("NeoTreeInit", { clear = true }),
       callback = function()
         local f = vim.fn.expand("%:p")
         if vim.fn.isdirectory(f) ~= 0 then
-          vim.cmd("Neotree current dir=" .. vim.fn.fnameescape(f))
+          -- Defer to avoid timing issues with nui.nvim
+          vim.schedule(function()
+            -- Delete the directory buffer first
+            vim.cmd("bwipeout")
+            vim.cmd("Neotree current dir=" .. vim.fn.fnameescape(f))
+          end)
           return true
         end
       end,
