@@ -51,8 +51,8 @@ return {
         },
       },
       
-      -- Code checking
-      checkOnSave = {
+      -- Code checking (use 'check' instead of deprecated 'checkOnSave')
+      check = {
         command = "clippy",
         extraArgs = { "--no-deps" },
       },
