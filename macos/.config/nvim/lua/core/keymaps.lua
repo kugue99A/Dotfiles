@@ -145,7 +145,8 @@ keymap("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Terminal down window nav" })
 keymap("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Terminal up window nav" })
 keymap("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Terminal right window nav" })
 
--- LSP keymaps (set on LspAttach)
+-- LSP keymaps are handled by lspsaga.nvim (lua/plugins/lspsaga.lua)
+-- Only keeping non-lspsaga LSP keymaps here
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("UserLspConfig", {}),
 	callback = function(ev)
@@ -156,34 +157,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			keymap(mode, lhs, rhs, { buffer = buffer, desc = desc })
 		end
 
-		-- Navigation
-		map("n", "gd", vim.lsp.buf.definition, "Go to definition")
-		map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
-		map("n", "gf", vim.lsp.buf.references, "Find references")
-		map("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
-		map("n", "gt", vim.lsp.buf.type_definition, "Go to type definition")
-
-		-- Documentation & Diagnostics
+		-- Hover (K is standard)
 		map("n", "K", vim.lsp.buf.hover, "Show hover documentation")
-		map("n", "gh", vim.diagnostic.open_float, "Show diagnostics hover")
+
+		-- Signature help
 		map("n", "<C-k>", vim.lsp.buf.signature_help, "Show signature help")
 		map("i", "<C-k>", vim.lsp.buf.signature_help, "Show signature help")
-
-		-- Code actions & Refactoring
-		map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code actions")
-		map("n", "gr", vim.lsp.buf.rename, "Rename symbol")
-		map("n", "<leader>rn", vim.lsp.buf.rename, "Rename symbol")
-
-		-- Formatting
-		map("n", "<leader>f", function()
-			vim.lsp.buf.format({ async = true })
-		end, "Format document")
-
-		-- Diagnostics
-		map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
-		map("n", "[d", vim.diagnostic.goto_prev, "Previous diagnostic")
-		map("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
-		map("n", "<leader>xd", vim.diagnostic.setloclist, "Diagnostics to location list")
 
 		-- Workspace
 		map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, "Add workspace folder")
