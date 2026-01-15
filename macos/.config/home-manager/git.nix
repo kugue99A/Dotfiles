@@ -35,6 +35,12 @@
           selectedLineBgColor = ["#3c3836"];
         };
       };
+      git = {
+        paging = {
+          colorArg = "always";
+          pager = "delta --dark --paging=never --side-by-side --line-numbers";
+        };
+      };
     };
   };
 }
