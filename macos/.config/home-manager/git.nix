@@ -16,6 +16,7 @@
         navigate = true;
         dark = true;
         line-numbers = true;
+        side-by-side = true;
       };
       merge.conflictStyle = "zdiff3";
       ghq.root = "~/Workspace";
