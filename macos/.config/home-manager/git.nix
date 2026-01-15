@@ -9,7 +9,16 @@
     extraConfig = {
       init.defaultBranch = "main";
       core.editor = "nvim";
+      core.pager = "delta";
       pull.rebase = false;
+      interactive.diffFilter = "delta --color-only";
+      delta = {
+        navigate = true;
+        dark = true;
+        line-numbers = true;
+      };
+      merge.conflictStyle = "zdiff3";
+      ghq.root = "~/Workspace";
     };
   };
 

@@ -22,6 +22,8 @@ in
     fzf
     lsd
     lazygit
+    delta  # git diff pager
+    ghq    # repository management
     zellij
     zoxide
     
