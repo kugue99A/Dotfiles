@@ -6,6 +6,8 @@
     ./shell.nix
     ./git.nix
     ./terminal.nix
+    ./aerospace.nix
+    ./sketchybar.nix
   ];
 
   home.username = "yoheikugue";

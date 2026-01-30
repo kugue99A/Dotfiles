@@ -46,6 +46,9 @@ in
     lua5_4
     pkg-config
     
+    # Window manager
+    aerospace  # i3-like tiling window manager for macOS
+
     # Other useful tools
     htop
     tree
