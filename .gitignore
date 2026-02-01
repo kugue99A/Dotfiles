@@ -30,6 +30,15 @@ node_modules/
 # === npm config noise ===
 macos/.config/configstore/
 
+# === Home Manager managed symlinks (source of truth: .nix files) ===
+macos/.config/bat/config
+macos/.config/fish/config.fish
+macos/.config/git/config
+
+# === Fish functions (Home Manager + Fisher generated) ===
+macos/.config/fish/functions/
+# fish_plugins is kept (Fisher restore source)
+
 # === Fish shell ===
 **/fish_variables
 
