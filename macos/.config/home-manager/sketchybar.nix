@@ -3,95 +3,10 @@
 {
   # === ヘルパースクリプト ===
 
-  # 1. アプリ名→NerdFontアイコン マッピング
+  # 1. アプリ名→アイコン マッピング (sketchybar-app-font 公式版)
   home.file.".config/sketchybar/helpers/icon_map.sh" = {
+    source = "${pkgs.sketchybar-app-font}/bin/icon_map.sh";
     executable = true;
-    text = ''
-      #!/bin/bash
-      # アプリ名→NerdFont アイコンマッピング
-      # 使い方: source icon_map.sh; __icon_map "AppName"; echo $icon_result
-
-      __icon_map() {
-        case "$1" in
-          # ブラウザ
-          "Safari"|"safari")                   icon_result="󰀹" ;;
-          "Google Chrome"|"Chrome")            icon_result="" ;;
-          "Arc")                               icon_result="󰞍" ;;
-          "Firefox"|"firefox")                 icon_result="󰈹" ;;
-          "Brave Browser")                     icon_result="󰖟" ;;
-          "Microsoft Edge")                    icon_result="󰇩" ;;
-          "Orion")                             icon_result="󰇧" ;;
-          # ターミナル・エディタ
-          "WezTerm"|"wezterm-gui")             icon_result="" ;;
-          "Terminal"|"ターミナル")             icon_result="" ;;
-          "iTerm2"|"iTerm")                    icon_result="" ;;
-          "Alacritty")                         icon_result="" ;;
-          "kitty")                             icon_result="󰄛" ;;
-          "Code"|"Visual Studio Code")         icon_result="󰨞" ;;
-          "Cursor")                            icon_result="󰨞" ;;
-          "Neovide")                           icon_result="" ;;
-          "Zed")                               icon_result="󰘦" ;;
-          "Xcode")                             icon_result="󰘦" ;;
-          "IntelliJ IDEA"*)                    icon_result="" ;;
-          # コミュニケーション
-          "Slack")                             icon_result="󰒱" ;;
-          "Discord")                           icon_result="󰙯" ;;
-          "Microsoft Teams"*)                  icon_result="󰊻" ;;
-          "Telegram")                          icon_result="" ;;
-          "LINE")                              icon_result="󰍡" ;;
-          "Messages"|"メッセージ")             icon_result="󰍦" ;;
-          "Mail"|"メール")                     icon_result="󰇮" ;;
-          "Thunderbird")                       icon_result="" ;;
-          # メディア
-          "Spotify")                           icon_result="󰓇" ;;
-          "Music"|"ミュージック")              icon_result="󰝚" ;;
-          "YouTube Music")                     icon_result="󰗃" ;;
-          "VLC"|"IINA")                        icon_result="󰕼" ;;
-          "Photos"|"写真")                     icon_result="󰋩" ;;
-          "Preview"|"プレビュー")              icon_result="" ;;
-          # Apple
-          "Finder")                            icon_result="󰀶" ;;
-          "System Preferences"|"System Settings"|"システム設定") icon_result="" ;;
-          "App Store")                         icon_result="" ;;
-          "Activity Monitor"|"アクティビティモニタ") icon_result="󱕍" ;;
-          "Calendar"|"カレンダー")             icon_result="" ;;
-          "Notes"|"メモ")                      icon_result="󱞎" ;;
-          "Reminders"|"リマインダー")          icon_result="󰃮" ;;
-          "FaceTime")                          icon_result="" ;;
-          "Maps"|"マップ")                     icon_result="󰍎" ;;
-          "Keychain Access"|"キーチェーンアクセス") icon_result="" ;;
-          # 開発ツール
-          "Docker"|"Docker Desktop")           icon_result="" ;;
-          "Postman")                           icon_result="󰒍" ;;
-          "TablePlus")                         icon_result="󰆼" ;;
-          "GitKraken")                         icon_result="" ;;
-          # デザイン
-          "Figma")                             icon_result="" ;;
-          "Sketch")                            icon_result="" ;;
-          "Affinity Designer"*)                icon_result="󰃣" ;;
-          "Affinity Photo"*)                   icon_result="󰃣" ;;
-          # ユーティリティ
-          "1Password"*)                        icon_result="󰌋" ;;
-          "Raycast")                           icon_result="󰑣" ;;
-          "Alfred")                            icon_result="" ;;
-          "Notion")                            icon_result="󰈄" ;;
-          "Obsidian")                          icon_result="󱓧" ;;
-          "Karabiner-Elements"*)               icon_result="󰌌" ;;
-          "Parallels Desktop")                 icon_result="󰒋" ;;
-          "Transmit")                          icon_result="󰒍" ;;
-          # PDF・オフィス
-          "Microsoft Word")                    icon_result="󰈬" ;;
-          "Microsoft Excel")                   icon_result="󰈛" ;;
-          "Microsoft PowerPoint")              icon_result="󰈧" ;;
-          "Pages")                             icon_result="󰈙" ;;
-          "Numbers")                           icon_result="󰈛" ;;
-          "Keynote")                           icon_result="󰐨" ;;
-          "Adobe Acrobat"*)                    icon_result="" ;;
-          # フォールバック: 先頭1文字
-          *)                                   icon_result="''${1:0:1}" ;;
-        esac
-      }
-    '';
   };
 
   # 2. ワークスペースアイコン更新スクリプト
@@ -123,7 +38,40 @@
     '';
   };
 
-  # 3. フロントアプリアイコン更新スクリプト
+  # 3. ワークスペーススクリプト (フォーカス判定 + アイコン更新)
+  home.file.".config/sketchybar/helpers/space_script.sh" = {
+    executable = true;
+    text = ''
+      #!/bin/bash
+      # 使い方: space_script.sh <workspace_id> <ws_color> <highlight_color>
+      WS="$1"; COLOR="$2"; HIGHLIGHT="$3"
+
+      # フォーカス状態の更新 (イベント時 or 初期化時のみ)
+      # routine (update_freq) 時は AEROSPACE_FOCUSED_WORKSPACE が空なのでスキップ
+      if [ "$SENDER" = "aerospace_workspace_change" ] || [ "$SENDER" = "forced" ]; then
+        if [ "$SENDER" = "forced" ]; then
+          # 初期化時は aerospace に直接問い合わせ
+          FOCUSED_WS=$(${pkgs.aerospace}/bin/aerospace list-workspaces --focused)
+        else
+          FOCUSED_WS="$AEROSPACE_FOCUSED_WORKSPACE"
+        fi
+
+        if [ "$FOCUSED_WS" = "$WS" ]; then
+          sketchybar --set "$NAME" background.drawing=on background.color="$COLOR" \
+            background.corner_radius=6 background.height=26 \
+            icon.color="$HIGHLIGHT" label.color="$HIGHLIGHT"
+        else
+          sketchybar --set "$NAME" background.drawing=off \
+            icon.color="$COLOR" label.color="$COLOR"
+        fi
+      fi
+
+      # アイコン更新 (常に実行 - イベント時も routine 時も)
+      "$HOME/.config/sketchybar/helpers/workspace_icons.sh" "$WS"
+    '';
+  };
+
+  # 5. フロントアプリアイコン更新スクリプト
   home.file.".config/sketchybar/helpers/front_app_icon.sh" = {
     executable = true;
     text = ''
@@ -134,7 +82,7 @@
     '';
   };
 
-  # 4. CPU更新スクリプト
+  # 6. CPU更新スクリプト
   home.file.".config/sketchybar/helpers/cpu_update.sh" = {
     executable = true;
     text = ''
@@ -153,23 +101,23 @@
     configType = "bash";
     extraPackages = with pkgs; [ jq ];
     config = ''
-      # === Gruvbox Dark カラー定義 ===
+      # === Iceberg Dark カラー定義 ===
       TRANSPARENT=0x00000000
-      BG=0xff3c3836
-      TEXT=0xffebdbb2
-      INACTIVE=0xff928374
-      HIGHLIGHT=0xfffbf1c7
+      BG=0xff161821
+      TEXT=0xffc6c8d1
+      INACTIVE=0xff6b7089
+      HIGHLIGHT=0xffd2d4de
 
-      # ウィジェットごとのテーマカラー (参考: SoichiroYamane/dotfiles の cmap)
-      CLR_RED=0xffcc241d
-      CLR_ORANGE=0xffd65d0e
-      CLR_YELLOW=0xffd79921
-      CLR_GREEN=0xff98971a
-      CLR_AQUA=0xff689d6a
-      CLR_BLUE=0xff458588
-      CLR_PURPLE=0xffb16286
-      CLR_BLUE_BR=0xff83a598
-      CLR_PURPLE_BR=0xffd3869b
+      # ウィジェットごとのテーマカラー (Iceberg palette)
+      CLR_RED=0xffe27878
+      CLR_ORANGE=0xffe2a478
+      CLR_YELLOW=0xffe9b189
+      CLR_GREEN=0xffb4be82
+      CLR_AQUA=0xff89b8c2
+      CLR_BLUE=0xff84a0c6
+      CLR_PURPLE=0xffa093c7
+      CLR_BLUE_BR=0xff91acd1
+      CLR_PURPLE_BR=0xffada0d3
 
       # ワークスペースカラーマップ
       CMAP=($CLR_RED $CLR_ORANGE $CLR_YELLOW $CLR_GREEN $CLR_AQUA $CLR_BLUE $CLR_PURPLE $CLR_BLUE_BR $CLR_PURPLE_BR)
@@ -205,6 +153,9 @@
       # ============================================================
       #  LEFT: ワークスペース
       # ============================================================
+      # カスタムイベントを宣言 (AeroSpace の exec-on-workspace-change から trigger される)
+      sketchybar --add event aerospace_workspace_change
+
       for i in $(seq 1 9); do
         COLOR=''${CMAP[$((i-1))]}
         sketchybar --add item space.$i left \
@@ -214,28 +165,19 @@
                      icon.color=$COLOR \
                      icon.padding_left=8 \
                      icon.padding_right=4 \
-                     label.font="SauceCodePro Nerd Font Mono:Medium:13.0" \
+                     label.font="sketchybar-app-font:Regular:16.0" \
                      label.color=$COLOR \
                      label.drawing=off \
                      background.drawing=off \
                      update_freq=5 \
-                     script="
-                       # ワークスペースのフォーカス状態を更新
-                       if [ \"\$AEROSPACE_FOCUSED_WORKSPACE\" = \"$i\" ]; then
-                         sketchybar --set \$NAME background.drawing=on background.color=$COLOR background.corner_radius=6 background.height=26 icon.color=$HIGHLIGHT label.color=$HIGHLIGHT
-                       else
-                         sketchybar --set \$NAME background.drawing=off icon.color=$COLOR label.color=$COLOR
-                       fi
-                       # ワークスペース内アプリアイコンを更新
-                       $HOME/.config/sketchybar/helpers/workspace_icons.sh $i
-                     " \
+                     script="$HOME/.config/sketchybar/helpers/space_script.sh $i $COLOR $HIGHLIGHT" \
                    --subscribe space.$i aerospace_workspace_change
       done
 
       # ワークスペース bracket
       sketchybar --add bracket bracket.spaces space.1 space.2 space.3 space.4 space.5 space.6 space.7 space.8 space.9 \
                  --set bracket.spaces \
-                   background.color=$BG \
+                   background.color=$TRANSPARENT \
                    background.corner_radius=8 \
                    background.height=26 \
                    background.border_width=2 \
@@ -247,7 +189,7 @@
       sketchybar --add item front_app center \
                  --set front_app \
                    icon.drawing=on \
-                   icon.font="SauceCodePro Nerd Font Mono:Bold:16.0" \
+                   icon.font="sketchybar-app-font:Regular:16.0" \
                    icon.color=$TEXT \
                    icon.padding_right=6 \
                    label.font="SauceCodePro Nerd Font Mono:Bold:13.0" \
@@ -272,13 +214,14 @@
       sketchybar --add item cal.date right \
                  --set cal.date \
                    icon.drawing=off \
+                   label.padding_left=8 \
                    label.color=$CLR_BLUE \
                    update_freq=60 \
                    script='sketchybar --set $NAME label="$(date "+%m/%d %a")"'
 
       sketchybar --add bracket bracket.cal cal.time cal.date \
                  --set bracket.cal \
-                   background.color=$BG \
+                   background.color=$TRANSPARENT \
                    background.corner_radius=8 \
                    background.height=26 \
                    background.border_width=2 \
@@ -313,7 +256,7 @@
 
       sketchybar --add bracket bracket.battery battery \
                  --set bracket.battery \
-                   background.color=$BG \
+                   background.color=$TRANSPARENT \
                    background.corner_radius=8 \
                    background.height=26 \
                    background.border_width=2 \
@@ -344,7 +287,7 @@
 
       sketchybar --add bracket bracket.volume volume \
                  --set bracket.volume \
-                   background.color=$BG \
+                   background.color=$TRANSPARENT \
                    background.corner_radius=8 \
                    background.height=26 \
                    background.border_width=2 \
@@ -374,7 +317,7 @@
 
       sketchybar --add bracket bracket.network network \
                  --set bracket.network \
-                   background.color=$BG \
+                   background.color=$TRANSPARENT \
                    background.corner_radius=8 \
                    background.height=26 \
                    background.border_width=2 \
@@ -402,7 +345,7 @@
 
       sketchybar --add bracket bracket.mem mem \
                  --set bracket.mem \
-                   background.color=$BG \
+                   background.color=$TRANSPARENT \
                    background.corner_radius=8 \
                    background.height=26 \
                    background.border_width=2 \
@@ -417,13 +360,19 @@
                    icon.color=$CLR_AQUA \
                    label.color=$CLR_AQUA \
                    graph.color=$CLR_AQUA \
-                   graph.fill_color=$CLR_AQUA \
+                   graph.fill_color=$TRANSPARENT \
+                   background.height=20 \
+                   background.drawing=on \
+                   background.color=$TRANSPARENT \
+                   label.y_offset=-4 \
+                   icon.y_offset=-4 \
+                   y_offset=4 \
                    update_freq=2 \
                    script='$HOME/.config/sketchybar/helpers/cpu_update.sh'
 
       sketchybar --add bracket bracket.cpu cpu \
                  --set bracket.cpu \
-                   background.color=$BG \
+                   background.color=$TRANSPARENT \
                    background.corner_radius=8 \
                    background.height=26 \
                    background.border_width=2 \
