@@ -1,0 +1,1 @@
+/nix/store/rl5k9fyrlkzyr90zwbfvv5l80pw9a7ll-home-manager-files/.config/fish/functions/lg.fish

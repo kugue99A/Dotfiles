@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  # Font configuration
+  fonts.fontconfig.enable = true;
   # Starship configuration
   programs.starship = {
     enable = true;
