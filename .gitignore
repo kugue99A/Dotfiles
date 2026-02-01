@@ -19,6 +19,9 @@
 .claude/
 .serena/
 
+# === Local config (machine/user specific) ===
+macos/.config/home-manager/local.nix
+
 # === Nix build artifacts ===
 result
 macos/.config/home-manager/result

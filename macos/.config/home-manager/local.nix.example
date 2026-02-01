@@ -1,0 +1,9 @@
+# マシン/ユーザー固有の設定値
+# このファイルを local.nix にコピーして値を設定する
+# cp local.nix.example local.nix
+{
+  username = "your-username";
+  homeDirectory = "/Users/your-username";
+  gitUserName = "your-name";
+  gitUserEmail = "your-email@example.com";
+}

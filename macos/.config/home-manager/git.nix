@@ -1,12 +1,17 @@
 { pkgs, ... }:
 
+let
+  local = import ./local.nix;
+in
 {
   # Git configuration
   programs.git = {
     enable = true;
-    userName = "yoheikugue";
-    userEmail = "your-email@example.com";  # Update this with your email
-    extraConfig = {
+    settings = {
+      user = {
+        name = local.gitUserName;
+        email = local.gitUserEmail;
+      };
       init.defaultBranch = "main";
       core.editor = "nvim";
       core.pager = "delta";
