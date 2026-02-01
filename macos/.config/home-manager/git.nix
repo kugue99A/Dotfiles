@@ -36,10 +36,12 @@
         };
       };
       git = {
-        paging = {
-          colorArg = "always";
-          pager = "delta --dark --paging=never --side-by-side --line-numbers";
-        };
+        pagers = [
+          {
+            colorArg = "always";
+            pager = "delta --dark --paging=never --side-by-side --line-numbers";
+          }
+        ];
       };
     };
   };
