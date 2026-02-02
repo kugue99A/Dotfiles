@@ -184,17 +184,34 @@ keybinds clear-defaults=true {
         bind "esc" { SwitchToMode "normal"; }
     }
     // Global shortcuts that work in most modes
+    // alt + key で統一 (AeroSpace は cmd+alt)
     shared_except "locked" {
-        // bind "Ctrl g" { SwitchToMode "locked"; }  // disabled
+        // pane移動: alt-hjkl
         bind "Alt h" { MoveFocusOrTab "left"; }
         bind "Alt j" { MoveFocus "down"; }
         bind "Alt k" { MoveFocus "up"; }
         bind "Alt l" { MoveFocusOrTab "right"; }
-        bind "Alt n" { NewPane; }
-        bind "Alt +" { Resize "Increase"; }
-        bind "Alt -" { Resize "Decrease"; }
-        bind "Alt [" { PreviousSwapLayout; }
-        bind "Alt ]" { NextSwapLayout; }
+
+        // tab移動: alt-n/p
+        bind "Alt n" { GoToNextTab; }
+        bind "Alt p" { GoToPreviousTab; }
+
+        // pane分割: alt-v(縦) alt-s(横)
+        bind "Alt v" { NewPane "right"; }
+        bind "Alt s" { NewPane "down"; }
+
+        // paneリサイズ: alt-HJKL
+        bind "Alt H" { Resize "Increase left"; }
+        bind "Alt J" { Resize "Increase down"; }
+        bind "Alt K" { Resize "Increase up"; }
+        bind "Alt L" { Resize "Increase right"; }
+
+        // tab作成: alt-c
+        bind "Alt c" { NewTab; }
+
+        // tab削除: alt-X / pane削除: alt-x
+        bind "Alt X" { CloseTab; }
+        bind "Alt x" { CloseFocus; }
     }
     shared_except "locked" "scroll" "search" {
         // bind "Ctrl s" { SwitchToMode "scroll"; }

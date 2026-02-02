@@ -74,6 +74,14 @@ in
     lua5_4
     pkg-config
     
+    # Window manager
+    aerospace  # i3-like tiling window manager for macOS
+
+    # Nerd Fonts
+    nerd-fonts.sauce-code-pro
+    nerd-fonts.hack
+    sketchybar-app-font  # SketchyBar用アプリアイコンフォント（リガチャベース）
+
     # Other useful tools
     htop
     tree

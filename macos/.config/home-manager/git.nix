@@ -1,11 +1,14 @@
 { pkgs, ... }:
 
+let
+  local = import ./local.nix;
+in
 {
   # Git configuration
   programs.git = {
     enable = true;
-    userName = "kugue99A";
-    userEmail = "hisabisa99yohey@gmail.com";
+    userName = local.gitUserName;
+    userEmail = local.gitUserEmail;
     extraConfig = {
       init.defaultBranch = "main";
       core.editor = "nvim";
@@ -42,25 +45,25 @@
     *.svg diff=image
   '';
 
-  # Lazygit - disabled Home Manager config to allow manual management
-  # programs.lazygit = {
-  #   enable = true;
-  #   settings = {
-  #     gui = {
-  #       theme = {
-  #         lightTheme = false;
-  #         activeBorderColor = ["#d79921" "bold"];
-  #         inactiveBorderColor = ["#a89984"];
-  #         selectedLineBgColor = ["#3c3836"];
-  #       };
-  #     };
-  #     git = {
-  #       paging = {
-  #         colorArg = "always";
-  #         pager = "delta --dark --paging=never --side-by-side --line-numbers";
-  #         useConfig = false;
-  #       };
-  #     };
-  #   };
-  # };
+  # Lazygit
+  programs.lazygit = {
+    enable = true;
+    settings = {
+      gui = {
+        theme = {
+          lightTheme = false;
+          activeBorderColor = ["#d79921" "bold"];
+          inactiveBorderColor = ["#a89984"];
+          selectedLineBgColor = ["#3c3836"];
+        };
+      };
+      git = {
+        paging = {
+          colorArg = "always";
+          pager = "delta --dark --paging=never --side-by-side --line-numbers";
+          useConfig = false;
+        };
+      };
+    };
+  };
 }

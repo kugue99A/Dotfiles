@@ -1,29 +1,56 @@
-# API Keys and secrets
+# === Secrets & credentials ===
 *.env
 .env*
-**/config.fish.backup
-**/*backup*
-
-# Sensitive configuration files
-**/fish_variables
 **/.secrets
 
-# macOS
+# === macOS ===
 .DS_Store
 .AppleDouble
 .LSOverride
 
-# IDE/Editor files
+# === Editor / IDE ===
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Logs
-*.log
+# === AI / agent tools ===
+.claude/
+.serena/
 
-# Temporary files
+# === Local config (machine/user specific) ===
+macos/.config/home-manager/local.nix
+
+# === Nix build artifacts ===
+result
+macos/.config/home-manager/result
+
+# === Node.js ===
+node_modules
+node_modules/
+
+# === npm config noise ===
+macos/.config/configstore/
+
+# === Home Manager managed symlinks (source of truth: .nix files) ===
+macos/.config/bat/config
+macos/.config/fish/config.fish
+macos/.config/git/config
+
+# === Fish functions (Home Manager + Fisher generated) ===
+macos/.config/fish/functions/
+# fish_plugins is kept (Fisher restore source)
+
+# === Fish shell ===
+**/fish_variables
+
+# === Backups ===
+**/config.fish.backup
+**/*backup*
+
+# === Logs & temp ===
+*.log
 tmp/
 temp/
 .tmp/

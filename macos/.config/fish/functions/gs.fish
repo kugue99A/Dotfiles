@@ -1,1 +1,0 @@
-/nix/store/9ghwhsaxabm4a8kpg9gg64dg1vgzqqc1-home-manager-files/.config/fish/functions/gs.fish

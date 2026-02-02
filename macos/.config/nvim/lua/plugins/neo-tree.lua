@@ -229,6 +229,30 @@ return {
   },
   
   config = function(_, opts)
+    -- Add event handler to delete No Name buffers after opening files
+    opts.event_handlers = opts.event_handlers or {}
+    table.insert(opts.event_handlers, {
+      event = "file_open_requested",
+      handler = function()
+        -- Close No Name buffers when opening a file
+        vim.schedule(function()
+          for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr) then
+              local bufname = vim.api.nvim_buf_get_name(bufnr)
+              local buftype = vim.bo[bufnr].buftype
+              -- Delete empty unnamed buffers that are not special buffers
+              if bufname == "" and buftype == "" and vim.api.nvim_buf_line_count(bufnr) <= 1 then
+                local lines = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)
+                if #lines == 0 or (#lines == 1 and lines[1] == "") then
+                  pcall(vim.api.nvim_buf_delete, bufnr, { force = false })
+                end
+              end
+            end
+          end
+        end)
+      end,
+    })
+
     require("neo-tree").setup(opts)
 
     -- Open neo-tree when opening a directory
