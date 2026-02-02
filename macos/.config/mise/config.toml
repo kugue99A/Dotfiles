@@ -38,8 +38,12 @@ fzf = "latest"
 # Python package management
 uv = "latest"
 
-# Lua formatter  
+# Lua formatter
 "cargo:stylua" = "latest"
+"go:github.com/d-kuro/gwq/cmd/gwq" = "latest"
+
+# AI/Codex tools
+"npm:@openai/codex" = "latest"
 
 [env]
 # 共通の環境変数

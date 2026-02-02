@@ -73,5 +73,6 @@
     BROWSER = "open";
     PAGER = "less";
     MANPAGER = "nvim +Man!";
+    SHELL = "${pkgs.fish}/bin/fish";
   };
 }

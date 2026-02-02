@@ -5,17 +5,14 @@ return {
   
   -- File types this server will attach to
   filetypes = { "rust" },
-  
+
   -- Root directory markers to detect project root
-  root_markers = { 
-    "Cargo.toml", 
+  root_markers = {
+    "Cargo.toml",
     "rust-project.json",
     "Cargo.lock",
-    ".git" 
+    ".git"
   },
-  
-  -- Single file support
-  single_file_support = true,
   
   -- Log level
   log_level = vim.lsp.protocol.MessageType.Warning,

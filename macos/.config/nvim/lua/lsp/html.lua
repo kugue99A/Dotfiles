@@ -4,20 +4,17 @@ return {
   cmd = { "vscode-html-language-server", "--stdio" },
   
   -- File types this server will attach to
-  filetypes = { 
-    "html", 
-    "templ" 
+  filetypes = {
+    "html",
+    "templ"
   },
-  
+
   -- Root directory markers to detect project root
-  root_markers = { 
-    "package.json", 
-    ".git", 
-    "index.html" 
+  root_markers = {
+    "package.json",
+    ".git",
+    "index.html"
   },
-  
-  -- Single file support
-  single_file_support = true,
   
   -- Initialization options
   init_options = {

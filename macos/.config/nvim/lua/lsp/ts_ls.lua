@@ -6,43 +6,54 @@ return {
   cmd = { "typescript-language-server", "--stdio" },
   
   -- File types this server will attach to
-  filetypes = { 
-    "javascript", 
-    "javascriptreact", 
-    "typescript", 
-    "typescriptreact" 
+  filetypes = {
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
   },
-  
+
   -- Root directory markers to detect project root
-  root_markers = { 
-    "package.json", 
-    "tsconfig.json", 
+  root_markers = {
+    "package.json",
+    "tsconfig.json",
     "jsconfig.json",
-    ".git" 
+    ".git"
   },
-  
-  -- Single file support
-  single_file_support = true,
-  
+
   -- Initialization options
-  init_options = {
-    preferences = {
-      disableSuggestions = false,
-      quotePreference = "auto",
-      includeCompletionsForModuleExports = true,
-      includeCompletionsForImportStatements = true,
-      includeCompletionsWithSnippetText = true,
-      includeAutomaticOptionalChainCompletions = true,
-    },
-    -- Plugins to load
-    plugins = {
-      {
-        name = "@vue/typescript-plugin",
-        location = vim.fn.expand("~/.npm-global/lib/node_modules/@vue/typescript-plugin"),
-        languages = { "vue" }
+  init_options = (function()
+    local init_opts = {
+      preferences = {
+        disableSuggestions = false,
+        quotePreference = "auto",
+        includeCompletionsForModuleExports = true,
+        includeCompletionsForImportStatements = true,
+        includeCompletionsWithSnippetText = true,
+        includeAutomaticOptionalChainCompletions = true,
+      },
+      -- Plugins to load
+      plugins = {
+        {
+          name = "@vue/typescript-plugin",
+          location = vim.fn.expand("~/.npm-global/lib/node_modules/@vue/typescript-plugin"),
+          languages = { "vue" }
+        }
       }
     }
-  },
+
+    -- Dynamically get TypeScript installation path from mise
+    local mise_bin = vim.fn.expand("~/.local/bin/mise")
+    if vim.fn.executable(mise_bin) == 1 then
+      local ts_path_output = vim.fn.system(mise_bin .. " where npm:typescript 2>/dev/null")
+      if vim.v.shell_error == 0 and ts_path_output ~= "" then
+        local ts_lib = vim.trim(ts_path_output) .. "/lib/node_modules/typescript/lib"
+        init_opts.tsserver = { path = ts_lib }
+      end
+    end
+
+    return init_opts
+  end)(),
   
   -- TypeScript-specific settings
   settings = {

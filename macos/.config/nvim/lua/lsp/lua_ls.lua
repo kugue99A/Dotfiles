@@ -5,21 +5,18 @@ return {
   
   -- File types this server will attach to
   filetypes = { "lua" },
-  
+
   -- Root directory markers to detect project root
-  root_markers = { 
-    ".luarc.json", 
-    ".luarc.jsonc", 
-    ".luacheckrc", 
-    ".stylua.toml", 
-    "stylua.toml", 
-    "selene.toml", 
-    "selene.yml", 
-    ".git" 
+  root_markers = {
+    ".luarc.json",
+    ".luarc.jsonc",
+    ".luacheckrc",
+    ".stylua.toml",
+    "stylua.toml",
+    "selene.toml",
+    "selene.yml",
+    ".git"
   },
-  
-  -- Single file support
-  single_file_support = true,
   
   -- Log level
   log_level = vim.lsp.protocol.MessageType.Warning,

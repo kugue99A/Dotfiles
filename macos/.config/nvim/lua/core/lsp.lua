@@ -68,9 +68,9 @@ vim.lsp.config.lua_ls = vim.tbl_deep_extend("force", {
         library = { vim.env.VIMRUNTIME },
       },
       completion = { callSnippet = "Replace" },
-      diagnostics = { 
+      diagnostics = {
         globals = { "vim" },
-        disable = { "missing-fields" } 
+        disable = { "missing-fields" }
       },
     },
   },
@@ -81,7 +81,7 @@ local ts_custom = load_server_config("ts_ls")
 vim.lsp.config.ts_ls = vim.tbl_deep_extend("force", {
   cmd = { "typescript-language-server", "--stdio" },
   filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-  root_markers = { "package.json", "tsconfig.json", ".git" },
+  root_markers = { "package.json", "tsconfig.json", "jsconfig.json", ".git" },
   capabilities = get_capabilities(),
 }, ts_custom)
 
@@ -217,5 +217,46 @@ vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.s
   border = "rounded",
   title = "Signature Help",
 })
+
+-- Create user command to show LSP client info (replacement for :LspInfo from nvim-lspconfig)
+vim.api.nvim_create_user_command("LspInfo", function()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  if #clients == 0 then
+    vim.notify("No LSP clients attached to current buffer", vim.log.levels.INFO)
+    return
+  end
+
+  local lines = { "LSP Clients attached to buffer " .. vim.api.nvim_get_current_buf() .. ":", "" }
+  for _, client in ipairs(clients) do
+    table.insert(lines, string.format("• %s (id: %d)", client.name, client.id))
+    table.insert(lines, string.format("  - root_dir: %s", client.config.root_dir or "N/A"))
+    table.insert(lines, string.format("  - filetypes: %s", table.concat(client.config.filetypes or {}, ", ")))
+    table.insert(lines, string.format("  - initialized: %s", client.initialized))
+    table.insert(lines, "")
+  end
+
+  -- Display in a floating window
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].filetype = "markdown"
+
+  local width = 80
+  local height = #lines
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = width,
+    height = math.min(height, 20),
+    col = (vim.o.columns - width) / 2,
+    row = (vim.o.lines - math.min(height, 20)) / 2,
+    style = "minimal",
+    border = "rounded",
+    title = " LSP Info ",
+    title_pos = "center",
+  })
+
+  -- Close with 'q' or ESC
+  vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, silent = true })
+  vim.keymap.set("n", "<Esc>", "<cmd>close<cr>", { buffer = buf, silent = true })
+end, { desc = "Show LSP client information" })
 
 return M

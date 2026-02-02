@@ -65,9 +65,10 @@ return {
     local double_tap_j = (function()
       local last_j_time = 0
       local threshold = 300 -- ミリ秒以内に2回押す
-      
+
       return function(prompt_bufnr)
-        local current_time = vim.loop.now()
+        -- vim.loop is deprecated, use vim.uv instead
+        local current_time = vim.uv.now()
         if current_time - last_j_time < threshold then
           -- 2回目のjが押された - Telescopeを閉じる
           actions.close(prompt_bufnr)

@@ -4,6 +4,30 @@ let
   serena = pkgs.writeShellScriptBin "serena" ''
     exec ${pkgs.nix}/bin/nix run github:oraios/serena -- "$@"
   '';
+
+  # Custom diff viewer for lazygit that supports images
+  lazygit-diff = pkgs.writeShellScriptBin "lazygit-diff" ''
+    # Check if we're diffing an image file
+    file="$1"
+
+    # Image extensions to detect
+    if [[ "$file" =~ \.(png|jpg|jpeg|gif|bmp|webp|svg|ico)$ ]]; then
+      # For image files, show both old and new versions side by side
+      echo "=== Image Diff: $file ==="
+      echo ""
+
+      # Show the file with chafa (supports Kitty/Sixel protocols)
+      if [ -f "$file" ]; then
+        echo "Current version:"
+        ${pkgs.chafa}/bin/chafa --format=symbols --size=80x40 "$file" 2>/dev/null || \
+        ${pkgs.viu}/bin/viu -w 80 "$file" 2>/dev/null || \
+        echo "[Unable to display image]"
+      fi
+    else
+      # For text files, use delta
+      exec ${pkgs.delta}/bin/delta --dark --paging=never --side-by-side --line-numbers "$@"
+    fi
+  '';
 in
 {
   home.packages = with pkgs; [
@@ -26,6 +50,10 @@ in
     ghq    # repository management
     zellij
     zoxide
+
+    # Image viewing in terminal
+    chafa  # Image-to-text converter with multiple protocol support
+    viu    # Image viewer for terminal
     
     # Language servers for existing Neovim setup
     lua-language-server
@@ -54,5 +82,6 @@ in
     wget
     gnumake  # for Telescope fzf-native
     serena  # Coding agent toolkit with semantic capabilities
+    lazygit-diff  # Custom diff viewer with image support
   ];
 }

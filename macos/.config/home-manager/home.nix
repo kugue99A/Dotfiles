@@ -8,8 +8,8 @@
     ./terminal.nix
   ];
 
-  home.username = "yoheikugue";
-  home.homeDirectory = "/Users/yoheikugue";
+  home.username = "s26988";
+  home.homeDirectory = "/Users/s26988";
   home.stateVersion = "25.05";
 
   programs.home-manager.enable = true;
