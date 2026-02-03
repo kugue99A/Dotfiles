@@ -7,12 +7,17 @@ in
   # Git configuration
   programs.git = {
     enable = true;
-    userName = local.gitUserName;
-    userEmail = local.gitUserEmail;
-    extraConfig = {
+    settings = {
+      user = {
+        name = local.gitUserName;
+        email = local.gitUserEmail;
+      };
       init.defaultBranch = "main";
-      core.editor = "nvim";
-      core.pager = "delta";
+      core = {
+        editor = "nvim";
+        pager = "delta";
+        attributesfile = "~/.gitattributes_global";
+      };
       pull.rebase = false;
       interactive.diffFilter = "delta --color-only";
       delta = {
@@ -26,9 +31,6 @@ in
 
       # Image diff support using chafa for text conversion
       diff.image.textconv = "${pkgs.chafa}/bin/chafa --format=symbols --size=80x40";
-
-      # Define image file patterns
-      core.attributesfile = "~/.gitattributes_global";
     };
   };
 
@@ -45,25 +47,25 @@ in
     *.svg diff=image
   '';
 
-  # Lazygit
-  programs.lazygit = {
-    enable = true;
-    settings = {
-      gui = {
-        theme = {
-          lightTheme = false;
-          activeBorderColor = ["#d79921" "bold"];
-          inactiveBorderColor = ["#a89984"];
-          selectedLineBgColor = ["#3c3836"];
-        };
-      };
-      git = {
-        paging = {
-          colorArg = "always";
-          pager = "delta --dark --paging=never --side-by-side --line-numbers";
-          useConfig = false;
-        };
-      };
-    };
-  };
+  # Lazygit - disabled to allow manual configuration
+  # programs.lazygit = {
+  #   enable = true;
+  #   settings = {
+  #     gui = {
+  #       theme = {
+  #         lightTheme = false;
+  #         activeBorderColor = ["#d79921" "bold"];
+  #         inactiveBorderColor = ["#a89984"];
+  #         selectedLineBgColor = ["#3c3836"];
+  #       };
+  #     };
+  #     git = {
+  #       paging = {
+  #         colorArg = "always";
+  #         useConfig = false;
+  #       };
+  #       pager = "delta --dark --paging=never --side-by-side --line-numbers";
+  #     };
+  #   };
+  # };
 }
