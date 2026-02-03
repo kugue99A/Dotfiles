@@ -192,8 +192,8 @@
                                 "to": [
                                     {
                                         "key_code": "left_shift",
-                                        "modifiers": ["left_option"],
-                                        "lazy": true
+                                        "lazy": true,
+                                        "modifiers": ["left_option"]
                                     }
                                 ],
                                 "to_if_alone": [{ "key_code": "spacebar" }],
