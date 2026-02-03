@@ -128,10 +128,10 @@
         position=top \
         color=$TRANSPARENT \
         border_width=0 \
-        padding_left=8 \
-        padding_right=8 \
-        margin=0 \
-        y_offset=0 \
+        padding_left=12 \
+        padding_right=12 \
+        margin=4 \
+        y_offset=4 \
         corner_radius=0 \
         blur_radius=30 \
         sticky=on \
