@@ -33,6 +33,9 @@ node_modules/
 # === npm config noise ===
 macos/.config/configstore/
 
+# === Raycast extensions (build artifacts) ===
+macos/.config/raycast/extensions/
+
 # === Home Manager managed symlinks (source of truth: .nix files) ===
 macos/.config/bat/config
 macos/.config/fish/config.fish
