@@ -1,6 +1,7 @@
 [tools]
 # Node.js - 最新のLTS版を使用
 nodejs = "lts"
+pnpm = "latest"  # AI開発RTA用パッケージマネージャー
 
 # Claude Code CLI - 常に最新版を取得
 claude-code = "latest"
@@ -9,7 +10,7 @@ claude-code = "latest"
 go = "latest"
 python = "latest"
 rust = "latest"
-lua = "latest"
+lua = "5.4"  # 安定版を使用（5.5.0はLuaRocksとの互換性問題あり）
 
 # 便利なCLIツール
 ripgrep = "latest"

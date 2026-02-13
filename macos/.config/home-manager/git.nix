@@ -29,8 +29,8 @@ in
       merge.conflictStyle = "zdiff3";
       ghq.root = "~/Workspace";
 
-      # Image diff support using chafa for text conversion
-      diff.image.textconv = "${pkgs.chafa}/bin/chafa --format=symbols --size=80x40";
+      # Image diff support using custom script with Kitty/Sixel fallback
+      diff.image.textconv = "git-image-textconv";
     };
   };
 

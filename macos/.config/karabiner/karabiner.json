@@ -182,6 +182,47 @@
                         ]
                     },
                     {
+                        "description": "Space + Enter/Escape/Tab: 通常のキーとして扱う",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "spacebar pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "key_code": "return_or_enter" },
+                                "to": [{ "key_code": "return_or_enter" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "spacebar pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "key_code": "escape" },
+                                "to": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "spacebar pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "key_code": "tab" },
+                                "to": [{ "key_code": "tab" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Spacebar: tap=Space, hold=Alt+Shift (AeroSpace)",
                         "manipulators": [
                             {
@@ -191,9 +232,23 @@
                                 },
                                 "to": [
                                     {
+                                        "set_variable": {
+                                            "name": "spacebar pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
                                         "key_code": "left_shift",
                                         "lazy": true,
                                         "modifiers": ["left_option"]
+                                    }
+                                ],
+                                "to_after_key_up": [
+                                    {
+                                        "set_variable": {
+                                            "name": "spacebar pressed",
+                                            "value": 0
+                                        }
                                     }
                                 ],
                                 "to_if_alone": [{ "key_code": "spacebar" }],

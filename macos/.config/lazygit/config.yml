@@ -10,6 +10,6 @@ gui:
       - '#3c3836'
 
 git:
-  pagers:
-    - colorArg: always
-      pager: delta --dark --paging=never --side-by-side --line-numbers
+  paging:
+    colorArg: always
+    useConfig: true
