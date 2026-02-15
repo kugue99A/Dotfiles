@@ -158,3 +158,66 @@ Located in `fish/functions/`:
 - Channel updates: `nix-channel --update && home-manager switch`
 - Generation rollback: `home-manager generations` then activate specific generation
 - Detailed errors: `home-manager switch --show-trace`
+
+## Claude Code スキル
+
+このリポジトリには、Claude Codeで使用できるスキル（スラッシュコマンド）が用意されています。
+
+### 利用可能なスキル
+
+| スキル | コマンド | 説明 |
+|--------|---------|------|
+| Nix Home-Manager | `/nix-home-manager` | Nix/Home-Manager設定の詳細ガイド、パターン、トラブルシューティング |
+| AeroSpace + SketchyBar | `/sketchybar-aerospace` | ウィンドウマネージャとステータスバーの設定ガイド |
+
+### 使い方
+
+```
+/nix-home-manager
+```
+
+これにより、Claude CodeがNix/Home-Manager設定に関する詳細なコンテキストを取得し、より正確な回答やコード編集が可能になります。
+
+### スキルが役立つ場面
+
+- **Nix Home-Manager**: 新しいパッケージ追加、モジュール作成、設定変更、トラブルシューティング
+- **SketchyBar/AeroSpace**: ウィジェット追加、キーバインド変更、テーマカスタマイズ
+
+## サブエージェント活用ガイドライン
+
+Claude Codeは複雑なタスクに対して専用のサブエージェントを使用できます。このリポジトリでの推奨使用法：
+
+### Nix/Home-Manager タスク
+
+| タスク種別 | 推奨エージェント | 用途 |
+|-----------|----------------|------|
+| 設定調査 | `Explore` | Home-Managerモジュールの構造理解、パターン調査 |
+| 実装計画 | `Plan` | 新しいモジュール追加、大規模な設定変更の計画 |
+| 設定適用 | `Bash` | `home-manager switch`, `nix-channel --update` |
+
+### 使用例
+
+```
+# Home-Managerモジュールの調査
+Task(subagent_type=Explore): "macos/.config/home-manager/ 内のモジュール構造を調査"
+
+# 新規パッケージ追加の計画
+Task(subagent_type=Plan): "packages.nix に新しい言語サーバーを追加する計画"
+```
+
+### エージェント選択の指針
+
+1. **Explore**: 「どこに」「何が」あるかを調べるとき
+   - モジュール間の依存関係調査
+   - 設定パターンの確認
+   - Nixpkgsのオプション調査
+
+2. **Plan**: 「どうやって」実装するかを決めるとき
+   - 新しいモジュール追加
+   - 複数ファイルにまたがる変更
+   - 設定のリファクタリング
+
+3. **Bash**: 実際にコマンドを実行するとき
+   - `home-manager switch`
+   - `nix search nixpkgs`
+   - `nix-channel --update`

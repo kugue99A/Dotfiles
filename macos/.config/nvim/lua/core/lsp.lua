@@ -1,4 +1,5 @@
--- Modern LSP configuration using vim.lsp.config and vim.lsp.enable
+-- Modern LSP configuration using vim.lsp.config and vim.lsp.enable (Neovim 0.11+)
+-- LSP server configurations are in nvim/lsp/*.lua (auto-loaded by Neovim)
 local M = {}
 
 -- Configure diagnostic display
@@ -39,173 +40,111 @@ local function get_capabilities()
   return capabilities
 end
 
--- Function to safely load server-specific config
-local function load_server_config(server_name)
-  local config_path = vim.fs.joinpath(vim.fn.stdpath("config"), "lua", "lsp", server_name .. ".lua")
-  
-  if vim.uv.fs_stat(config_path) then
-    local ok, custom_config = pcall(dofile, config_path)
-    if ok and type(custom_config) == "table" then
-      return custom_config
+-- Configure common settings for all LSP servers
+vim.lsp.config("*", {
+  capabilities = get_capabilities(),
+  root_markers = { ".git" },
+})
+
+-- LspAttach autocmd for common setup (on_attach replacement in Neovim 0.11+)
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    local bufnr = args.buf
+
+    -- Enable completion triggered by <c-x><c-o>
+    vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
+
+    -- Enable inlay hints if available
+    if client and client.server_capabilities.inlayHintProvider then
+      vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
     end
-  end
-  return {}
-end
 
--- Configure LSP servers using vim.lsp.config
--- Lua Language Server
-local lua_custom = load_server_config("lua_ls")
-vim.lsp.config.lua_ls = vim.tbl_deep_extend("force", {
-  cmd = { "lua-language-server" },
-  filetypes = { "lua" },
-  root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
-  capabilities = get_capabilities(),
-  settings = {
-    Lua = {
-      runtime = { version = "LuaJIT" },
-      workspace = {
-        checkThirdParty = false,
-        library = { vim.env.VIMRUNTIME },
-      },
-      completion = { callSnippet = "Replace" },
-      diagnostics = { 
-        globals = { "vim" },
-        disable = { "missing-fields" } 
-      },
-    },
-  },
-}, lua_custom)
+    -- Server-specific configurations
+    if client then
+      -- Lua: Disable formatting (use stylua instead)
+      if client.name == "lua_ls" then
+        client.server_capabilities.documentFormattingProvider = false
+        client.server_capabilities.documentRangeFormattingProvider = false
+      end
 
--- TypeScript Language Server
-local ts_custom = load_server_config("ts_ls")
-vim.lsp.config.ts_ls = vim.tbl_deep_extend("force", {
-  cmd = { "typescript-language-server", "--stdio" },
-  filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-  root_markers = { "package.json", "tsconfig.json", ".git" },
-  capabilities = get_capabilities(),
-}, ts_custom)
+      -- TypeScript: Disable formatting (use prettier instead) and add commands
+      if client.name == "ts_ls" then
+        client.server_capabilities.documentFormattingProvider = false
+        client.server_capabilities.documentRangeFormattingProvider = false
 
--- HTML Language Server
-local html_custom = load_server_config("html")
-vim.lsp.config.html = vim.tbl_deep_extend("force", {
-  cmd = { "vscode-html-language-server", "--stdio" },
-  filetypes = { "html", "templ" },
-  root_markers = { "package.json", ".git", "index.html" },
-  capabilities = get_capabilities(),
-  init_options = {
-    provideFormatter = true,
-    embeddedLanguages = { css = true, javascript = true },
-    configurationSection = { "html", "css", "javascript" },
-  },
-}, html_custom)
+        -- TypeScript-specific commands
+        vim.api.nvim_buf_create_user_command(bufnr, "TypescriptOrganizeImports", function()
+          vim.lsp.buf.execute_command({
+            command = "_typescript.organizeImports",
+            arguments = { vim.api.nvim_buf_get_name(0) },
+          })
+        end, { desc = "Organize imports" })
 
--- CSS Language Server
-vim.lsp.config.cssls = {
-  cmd = { "vscode-css-language-server", "--stdio" },
-  filetypes = { "css", "scss", "less" },
-  root_markers = { "package.json", ".git" },
-  capabilities = get_capabilities(),
-  settings = {
-    css = { validate = true },
-    less = { validate = true },
-    scss = { validate = true },
-  },
-}
+        vim.api.nvim_buf_create_user_command(bufnr, "TypescriptAddMissingImports", function()
+          vim.lsp.buf.execute_command({
+            command = "_typescript.addMissingImports",
+            arguments = { vim.api.nvim_buf_get_name(0) },
+          })
+        end, { desc = "Add missing imports" })
 
--- Go Language Server
-vim.lsp.config.gopls = {
-  cmd = { "gopls" },
-  filetypes = { "go", "gomod", "gowork", "gotmpl" },
-  root_markers = { "go.work", "go.mod", ".git" },
-  capabilities = get_capabilities(),
-  settings = {
-    gopls = {
-      gofumpt = true,
-      usePlaceholders = true,
-      completeUnimported = true,
-      staticcheck = true,
-      analyses = {
-        unusedparams = true,
-        shadow = true,
-      },
-      hints = {
-        assignVariableTypes = true,
-        compositeLiteralFields = true,
-        constantValues = true,
-        functionTypeParameters = true,
-        parameterNames = true,
-        rangeVariableTypes = true,
-      },
-    },
-  },
-}
+        vim.api.nvim_buf_create_user_command(bufnr, "TypescriptRemoveUnusedImports", function()
+          vim.lsp.buf.execute_command({
+            command = "_typescript.removeUnusedImports",
+            arguments = { vim.api.nvim_buf_get_name(0) },
+          })
+        end, { desc = "Remove unused imports" })
+      end
 
--- Rust Analyzer
-vim.lsp.config.rust_analyzer = {
-  cmd = { "rust-analyzer" },
-  filetypes = { "rust" },
-  root_markers = { "Cargo.toml", "rust-project.json" },
-  capabilities = get_capabilities(),
-  settings = {
-    ["rust-analyzer"] = {
-      cargo = { allFeatures = true },
-      check = {
-        command = "clippy",
-      },
-      procMacro = { enable = true },
-    },
-  },
-}
+      -- Rust: Add cargo keymaps
+      if client.name == "rust_analyzer" then
+        local opts = { buffer = bufnr, silent = true }
+        vim.keymap.set("n", "<leader>rr", function()
+          vim.cmd("!cargo run")
+        end, vim.tbl_extend("force", opts, { desc = "Cargo run" }))
+        vim.keymap.set("n", "<leader>rb", function()
+          vim.cmd("!cargo build")
+        end, vim.tbl_extend("force", opts, { desc = "Cargo build" }))
+        vim.keymap.set("n", "<leader>rt", function()
+          vim.cmd("!cargo test")
+        end, vim.tbl_extend("force", opts, { desc = "Cargo test" }))
+        vim.keymap.set("n", "<leader>rc", function()
+          vim.cmd("!cargo check")
+        end, vim.tbl_extend("force", opts, { desc = "Cargo check" }))
+        vim.keymap.set("n", "<leader>rl", function()
+          vim.cmd("!cargo clippy")
+        end, vim.tbl_extend("force", opts, { desc = "Cargo clippy" }))
+      end
 
--- Python Language Server
-vim.lsp.config.pyright = {
-  cmd = { "pyright-langserver", "--stdio" },
-  filetypes = { "python" },
-  root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
-  capabilities = get_capabilities(),
-  settings = {
-    python = {
-      analysis = {
-        autoSearchPaths = true,
-        diagnosticMode = "workspace",
-        useLibraryCodeForTypes = true,
-      },
-    },
-  },
-}
+      -- HTML: Enable format on save
+      if client.name == "html" then
+        if client.server_capabilities.documentFormattingProvider then
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            group = vim.api.nvim_create_augroup("LspFormat." .. bufnr, {}),
+            buffer = bufnr,
+            callback = function()
+              vim.lsp.buf.format({ async = false, timeout_ms = 2000 })
+            end,
+          })
+        end
+      end
+    end
+  end,
+})
 
--- TypeSpec Language Server
-vim.lsp.config.tsp_server = {
-  cmd = { "tsp-server", "--stdio" },
-  filetypes = { "typespec" },
-  root_markers = { "tspconfig.yaml", ".git" },
-  capabilities = get_capabilities(),
-}
-
--- Deno Language Server (only when deno.json exists)
-vim.lsp.config.denols = {
-  cmd = { "deno", "lsp" },
-  filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-  root_markers = { "deno.json", "deno.jsonc" },
-  capabilities = get_capabilities(),
-}
-
--- Enable LSP servers
-local servers_to_enable = {
+-- Enable LSP servers (configurations are auto-loaded from nvim/lsp/*.lua)
+vim.lsp.enable({
   "lua_ls",
-  "ts_ls", 
+  "ts_ls",
   "html",
   "cssls",
   "gopls",
-  "rust_analyzer", 
+  "rust_analyzer",
   "pyright",
   "denols",
-  "tsp_server"
-}
-
-for _, server in ipairs(servers_to_enable) do
-  vim.lsp.enable(server)
-end
+  "tsp_server",
+})
 
 -- Configure LSP handlers
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
