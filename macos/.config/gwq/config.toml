@@ -1,0 +1,18 @@
+# gwq configuration
+# git worktree manager with fuzzy finder
+
+[naming]
+# Template for worktree directory naming
+# {{.Host}}/{{.Owner}}/{{.Repository}}={{.Branch}}
+# Example: github.com/user/repo=feature-branch
+template = '{{.Host}}/{{.Owner}}/{{.Repository}}={{.Branch}}'
+
+[worktree]
+# Base directory for worktrees (same as ghq root for unified fzf search)
+basedir = '~/ghq'
+
+[cd]
+# Default directory for gwq cd command
+default = '~/.config/fish'
+# Use fish shell instead of zsh (absolute path)
+shell = '/Users/s26988/.nix-profile/bin/fish'

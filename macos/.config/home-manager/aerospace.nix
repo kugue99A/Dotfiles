@@ -26,10 +26,10 @@
     [gaps]
     inner.horizontal = 10
     inner.vertical = 10
-    outer.left = 10
-    outer.bottom = 10
-    outer.right = 10
-    outer.top = [{monitor."Studio Display" = 36}, 10]
+    outer.left = 30 
+    outer.bottom = 30 
+    outer.right = 30
+    outer.top = [{monitor."Built-in Retina Display" = 20}, 60]
 
     # ウィンドウ検出時にSketchyBarのワークスペースアイコンを更新
     [[on-window-detected]]

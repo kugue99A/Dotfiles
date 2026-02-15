@@ -1,0 +1,15 @@
+gui:
+  theme:
+    lightTheme: false
+    activeBorderColor:
+      - '#d79921'
+      - bold
+    inactiveBorderColor:
+      - '#a89984'
+    selectedLineBgColor:
+      - '#3c3836'
+
+git:
+  paging:
+    colorArg: always
+    useConfig: true

@@ -138,6 +138,41 @@ keybinds clear-defaults=true {
     }
     session {
         bind "d" { Detach; }
+        bind "w" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            };
+            SwitchToMode "normal"
+        }
+        bind "c" {
+            LaunchOrFocusPlugin "configuration" {
+                floating true
+                move_to_focused_tab true
+            };
+            SwitchToMode "normal"
+        }
+        bind "p" {
+            LaunchOrFocusPlugin "plugin-manager" {
+                floating true
+                move_to_focused_tab true
+            };
+            SwitchToMode "normal"
+        }
+        bind "a" {
+            LaunchOrFocusPlugin "zellij:about" {
+                floating true
+                move_to_focused_tab true
+            };
+            SwitchToMode "normal"
+        }
+        bind "s" {
+            LaunchOrFocusPlugin "zellij:share" {
+                floating true
+                move_to_focused_tab true
+            };
+            SwitchToMode "normal"
+        }
         bind "esc" { SwitchToMode "normal"; }
         // bind "Ctrl o" { SwitchToMode "normal"; }  // disabled
     }
@@ -211,6 +246,9 @@ plugins {
     filepicker location="zellij:strider" {
         cwd "/"
     }
+    configuration location="zellij:configuration"
+    plugin-manager location="zellij:plugin-manager"
+    about location="zellij:about"
 }
 
 // UI Configuration
@@ -222,8 +260,8 @@ pane_frames true
 // Mouse support
 mouse_mode true
 
-// Default shell - set to fish as in your tmux config
-default_shell "/usr/local/bin/fish"
+// Default shell - set to fish (Nix-managed)
+default_shell "/Users/s26988/.nix-profile/bin/fish"
 
 // Status bar at the bottom
 default_layout "default"
@@ -243,8 +281,21 @@ scrollback_editor "/usr/bin/vim"
 session_serialization true
 serialize_pane_viewport false
 
-// Theme customization - Gruvbox Dark
+// Theme customization - Iceberg Dark
 themes {
+    iceberg-dark {
+        fg "#c6c8d1"      // fg
+        bg "#161821"      // bg0
+        black "#161821"   // bg0
+        red "#e27878"     // red
+        green "#b4be82"   // green
+        yellow "#e2a478"  // yellow
+        blue "#84a0c6"    // blue
+        magenta "#a093c7" // purple
+        cyan "#89b8c2"    // cyan
+        white "#c6c8d1"   // fg
+        orange "#e2a478"  // orange
+    }
     gruvbox-dark {
         fg "#ebdbb2"      // fg
         bg "#282828"      // bg0
@@ -258,4 +309,34 @@ themes {
         white "#ebdbb2"   // fg
         orange "#fe8019"  // orange (bright)
     }
+}
+
+// Advanced mouse actions (v0.43.0+)
+// Enable mouse hover effects and pane grouping functionality
+advanced_mouse_actions true
+
+// Stacked resize behavior
+// Whether to stack panes when resizing beyond a certain size
+stacked_resize true
+
+// Release notes display
+// Whether to show release notes on first version run
+show_release_notes true
+
+// Web server configuration (v0.43.0+)
+// Whether to make sure a local web server is running when a new Zellij session starts
+// Navigate to http://127.0.0.1:8082 when enabled
+// web_server false
+
+// Whether to allow sessions to be shared through a local web server
+// Options: "on", "off", "disabled"
+// web_sharing "off"
+
+// Web server IP and port
+// web_server_ip "127.0.0.1"
+// web_server_port 8082
+
+// Web client font configuration
+web_client {
+    font "monospace"
 }
