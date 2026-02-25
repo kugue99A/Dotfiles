@@ -17,6 +17,7 @@ ripgrep = "latest"
 fd = "latest"
 bat = "latest"
 fzf = "latest"
+bottom = "latest"  # システムモニター (btm コマンド)
 
 # Language Servers for Neovim
 # TypeScript Language Server via npm
@@ -50,6 +51,8 @@ uv = "latest"
 # 共通の環境変数
 EDITOR = "nvim"
 VISUAL = "nvim"
+# GitHub API トークン（mise install 時のレートリミット回避）
+GITHUB_API_TOKEN = "{{exec(command='gh auth token')}}"
 
 [settings]
 # 実験的機能を有効化
