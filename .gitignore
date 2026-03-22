@@ -47,10 +47,13 @@ macos/.config/fish/functions/
 
 # === Fish shell ===
 **/fish_variables
+**/fishd.tmp.*
+**/fish_frozen_key_bindings.fish
 
 # === Backups ===
 **/config.fish.backup
 **/*backup*
+*.bak
 
 # === Logs & temp ===
 *.log
