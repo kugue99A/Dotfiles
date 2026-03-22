@@ -142,7 +142,6 @@ vim.lsp.enable({
   "gopls",
   "rust_analyzer",
   "pyright",
-  "denols",
   "tsp_server",
 })
 

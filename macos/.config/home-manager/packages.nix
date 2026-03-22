@@ -79,7 +79,6 @@ in
     gopls
     rust-analyzer
     markdown-oxide  # Markdown LSP
-    deno  # Deno LSP (denols)
     pyright  # Python LSP
     
     # Development languages

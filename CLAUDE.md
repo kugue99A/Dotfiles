@@ -164,7 +164,6 @@ The `./dotfiles` script implements:
 - `gopls` - Go
 - `rust_analyzer` - Rust
 - `pyright` - Python
-- `denols` - Deno (only when deno.json exists)
 - `tsp_server` - TypeSpec
 
 ### Theme and Visual Consistency
