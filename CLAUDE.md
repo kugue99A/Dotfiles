@@ -4,6 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 日本語で回答
 
+## ユーザー情報（グローバル）
+
+**氏名**: 久々江 耀平（くぐえ ようへい）
+**読み**: くぐえ ようへい
+**社員番号**: S26988
+**メールアドレス**: kugue_yohei@applibot.co.jp
+**Slack ID**: kugue_yohei
+**Wrike ID**: KUASUFZF
+**職種**: フロントエンドエンジニア
+**所属**: 株式会社アプリボット - LAB WEB
+**JB**: JB4
+
 ## neovimの問題はこちらを読む
 * https://neovim.io/doc/user/lsp.html
 
