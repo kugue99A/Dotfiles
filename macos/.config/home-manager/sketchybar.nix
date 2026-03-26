@@ -46,9 +46,21 @@
       # 使い方: space_script.sh <workspace_id> <ws_color> <highlight_color>
       WS="$1"; COLOR="$2"; HIGHLIGHT="$3"
 
-      # フォーカス状態の更新 (イベント時 or 初期化時のみ)
+      # フォーカス状態 + ディスプレイ割り当ての更新 (イベント時 or 初期化時のみ)
       # routine (update_freq) 時は AEROSPACE_FOCUSED_WORKSPACE が空なのでスキップ
       if [ "$SENDER" = "aerospace_workspace_change" ] || [ "$SENDER" = "forced" ]; then
+        # このワークスペースが所属するモニターを特定し、対応ディスプレイに表示
+        DISPLAY_ID=""
+        for mid in $(${pkgs.aerospace}/bin/aerospace list-monitors | awk -F'|' '{gsub(/ /,"",$1); print $1}'); do
+          if ${pkgs.aerospace}/bin/aerospace list-workspaces --monitor "$mid" | grep -qw "$WS"; then
+            DISPLAY_ID="$mid"
+            break
+          fi
+        done
+        if [ -n "$DISPLAY_ID" ]; then
+          sketchybar --set "$NAME" display="$DISPLAY_ID"
+        fi
+
         if [ "$SENDER" = "forced" ]; then
           # 初期化時は aerospace に直接問い合わせ
           FOCUSED_WS=$(${pkgs.aerospace}/bin/aerospace list-workspaces --focused)
@@ -173,15 +185,6 @@
                      script="$HOME/.config/sketchybar/helpers/space_script.sh $i $COLOR $HIGHLIGHT" \
                    --subscribe space.$i aerospace_workspace_change
       done
-
-      # ワークスペース bracket
-      sketchybar --add bracket bracket.spaces space.1 space.2 space.3 space.4 space.5 space.6 space.7 space.8 space.9 \
-                 --set bracket.spaces \
-                   background.color=$TRANSPARENT \
-                   background.corner_radius=8 \
-                   background.height=26 \
-                   background.border_width=2 \
-                   background.border_color=$CLR_YELLOW
 
       # ============================================================
       #  CENTER: フロントアプリ名 (アイコン付き)

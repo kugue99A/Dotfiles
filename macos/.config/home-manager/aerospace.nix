@@ -83,8 +83,8 @@
     alt-shift-n = 'workspace next'
     alt-shift-p = 'workspace prev'
 
-    # ワークスペース切替とフォーカス戻り: alt-shift-tab
-    alt-shift-tab = 'workspace-back-and-forth'
+    # モニタフォーカス切替: alt-shift-tab
+    alt-shift-tab = 'focus-monitor --wrap-around next'
 
     # ワークスペースをモニタ間で移動: ctrl-alt-shift-tab
     ctrl-alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
