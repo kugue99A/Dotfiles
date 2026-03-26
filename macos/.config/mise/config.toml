@@ -3,9 +3,6 @@
 nodejs = "lts"
 pnpm = "latest"  # AI開発RTA用パッケージマネージャー
 
-# Claude Code CLI - 常に最新版を取得
-claude-code = "latest"
-
 # 開発で使用する言語とツール
 go = "latest"
 python = "latest"
