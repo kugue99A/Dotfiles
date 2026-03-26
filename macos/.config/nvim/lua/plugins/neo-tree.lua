@@ -83,7 +83,7 @@ return {
         ["l"] = "open",
         ["h"] = "close_node",
         ["<esc>"] = "cancel",
-        ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
+        ["P"] = { "toggle_preview", config = { use_float = true } },
         ["S"] = "open_split",
         ["s"] = "open_vsplit",
         ["t"] = "open_tabnew",
