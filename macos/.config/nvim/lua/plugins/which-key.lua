@@ -28,6 +28,7 @@ return {
         { "<leader>g", group = "git" },
         { "<leader>gc", group = "commits" },
         { "<leader>gh", group = "hunks" },
+        { "<leader>o", group = "open" },
         { "<leader>q", group = "quit/session" },
         { "<leader>r", group = "rename/rust" },
         { "<leader>s", group = "search" },

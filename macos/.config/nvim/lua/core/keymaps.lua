@@ -172,3 +172,29 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end, "List workspace folders")
 	end,
 })
+
+-- :StartupTime command - show Neovim startup timeline in a scratch buffer
+vim.api.nvim_create_user_command("StartupTime", function()
+	local tmpfile = vim.fn.tempname()
+	vim.fn.system({ "nvim", "--headless", "--startuptime", tmpfile, "+quit" })
+	local lines = vim.fn.readfile(tmpfile)
+	vim.fn.delete(tmpfile)
+	vim.cmd("enew")
+	vim.bo.buftype = "nofile"
+	vim.bo.bufhidden = "wipe"
+	vim.bo.swapfile = false
+	vim.api.nvim_buf_set_name(0, "StartupTime")
+	vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+	vim.bo.modifiable = false
+end, { desc = "Show Neovim startup time profile" })
+
+-- Open current file in Obsidian
+keymap("n", "<leader>ob", function()
+  local filepath = vim.fn.expand("%:p")
+  if filepath == "" then
+    vim.notify("No file in buffer", vim.log.levels.WARN)
+    return
+  end
+  local uri = "obsidian://open?path=" .. vim.uri_encode(filepath, "rfc2396")
+  vim.fn.system({ "open", uri })
+end, { desc = "Open in Obsidian" })
