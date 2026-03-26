@@ -15,7 +15,55 @@ let
     ${pkgs.chafa}/bin/chafa --format=symbols --size=80x40 "$1"
   '';
 
+  # reminder-lint (https://github.com/CyberAgent/reminder-lint)
+  reminder-lint = pkgs.stdenv.mkDerivation {
+    pname = "reminder-lint";
+    version = "0.2.1";
+    src = pkgs.fetchurl {
+      url = "https://github.com/CyberAgent/reminder-lint/releases/download/0.2.1/reminder-lint-aarch64-apple-darwin.tar.xz";
+      sha256 = "0fqwnmrbw59rjs250qi90w1fzvs893sxvv6r9p9icfaz96q1s3p8";
+    };
+    sourceRoot = "reminder-lint-aarch64-apple-darwin";
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p $out/bin
+      cp reminder-lint $out/bin/
+      chmod +x $out/bin/reminder-lint
+    '';
+  };
+
   # Custom diff viewer for lazygit that supports images
+  # Git worktree runner (https://github.com/coderabbitai/git-worktree-runner)
+  git-gtr = pkgs.stdenv.mkDerivation {
+    pname = "git-gtr";
+    version = "2.4.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "coderabbitai";
+      repo = "git-worktree-runner";
+      rev = "main";
+      sha256 = "1hbp1rfdff19lvdizrmws72avvy4z6q5ajb13gzcgzsqdn0msyf6";
+    };
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p $out/share/git-gtr $out/bin
+      cp -r lib adapters templates completions $out/share/git-gtr/
+      cp bin/git-gtr $out/share/git-gtr/git-gtr
+      chmod +x $out/share/git-gtr/git-gtr
+
+      # Create wrapper that sets GTR_DIR
+      cat > $out/bin/gtr <<'WRAPPER'
+      #!/usr/bin/env bash
+      export GTR_DIR="@out@/share/git-gtr"
+      exec "@out@/share/git-gtr/git-gtr" "$@"
+      WRAPPER
+      substituteInPlace $out/bin/gtr --replace-warn "@out@" "$out"
+      chmod +x $out/bin/gtr
+
+      # Also provide as git-gtr for `git gtr` subcommand
+      cp $out/bin/gtr $out/bin/git-gtr
+    '';
+  };
+
   lazygit-diff = pkgs.writeShellScriptBin "lazygit-diff" ''
     # Check if we're diffing an image file
     file="$1"
@@ -70,6 +118,7 @@ in
     # Image viewing in terminal
     chafa  # Image-to-text converter with multiple protocol support
     viu    # Image viewer for terminal
+    imagemagick  # Required by snacks.nvim image (format conversion)
     
     # Language servers for existing Neovim setup
     lua-language-server
@@ -89,6 +138,13 @@ in
     lua5_4
     pkg-config
 
+    # epoch-lab-server development tools
+    protobuf      # proto file compilation (protoc)
+    clang-tools   # clang-format for proto file formatting
+    cmake         # clang-format dependency
+    ninja         # clang-format dependency
+    graphviz      # ER diagram generation (dot command)
+
     # Container runtime
     colima   # Container runtimes on macOS with minimal setup
     docker   # Docker CLI (works with Colima backend)
@@ -103,6 +159,7 @@ in
 
     # Other useful tools
     htop
+    hyperfine  # Statistical benchmarking tool
     tree
     jq
     curl
@@ -111,5 +168,8 @@ in
     serena  # Coding agent toolkit with semantic capabilities
     git-image-textconv  # Image textconv for git diff
     lazygit-diff  # Custom diff viewer with image support
+    git-gtr  # Git worktree runner
+    reminder-lint  # Code reminder tool (CyberAgent)
+    certbot  # Let's Encrypt certificate management
   ];
 }
