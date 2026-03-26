@@ -11,6 +11,7 @@ in
     ./terminal.nix
     ./aerospace.nix
     ./sketchybar.nix
+    ./tmux.nix
   ];
 
   home.username = local.username;
