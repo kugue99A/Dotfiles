@@ -30,19 +30,10 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
--- Get nvim-cmp capabilities if available
-local function get_capabilities()
-  local capabilities = vim.lsp.protocol.make_client_capabilities()
-  local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-  if ok then
-    capabilities = vim.tbl_deep_extend("force", capabilities, cmp_nvim_lsp.default_capabilities())
-  end
-  return capabilities
-end
-
 -- Configure common settings for all LSP servers
+-- cmp_nvim_lsp capabilities are merged at LspAttach time to avoid loading cmp at startup
 vim.lsp.config("*", {
-  capabilities = get_capabilities(),
+  capabilities = vim.lsp.protocol.make_client_capabilities(),
   root_markers = { ".git" },
 })
 
@@ -52,6 +43,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     local bufnr = args.buf
+
+    -- Merge cmp_nvim_lsp capabilities lazily (deferred from startup)
+    if client then
+      local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+      if ok then
+        local cmp_caps = cmp_nvim_lsp.default_capabilities()
+        client.capabilities = vim.tbl_deep_extend("force", client.capabilities, cmp_caps)
+      end
+    end
 
     -- Enable completion triggered by <c-x><c-o>
     vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
