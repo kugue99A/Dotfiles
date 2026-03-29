@@ -6,7 +6,7 @@ config.font = wezterm.font("SauceCodePro Nerd Font Mono")
 config.font_size = 13
 
 -- Default shell - use fish (Nix-managed)
-config.default_prog = { "/Users/s26988/.nix-profile/bin/fish" }
+config.default_prog = { wezterm.home_dir .. "/.nix-profile/bin/fish" }
 
 -- Image display support (Kitty, iTerm2, Sixel protocols)
 config.enable_kitty_graphics = true
