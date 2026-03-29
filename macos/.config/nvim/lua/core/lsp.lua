@@ -143,6 +143,7 @@ vim.lsp.enable({
   "rust_analyzer",
   "pyright",
   "tsp_server",
+  "gdscript",
 })
 
 -- Configure LSP handlers

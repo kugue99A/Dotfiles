@@ -145,6 +145,10 @@ in
     ninja         # clang-format dependency
     graphviz      # ER diagram generation (dot command)
 
+    # Game development
+    godot_4       # Godot 4 game engine
+    gdtoolkit_4   # GDScript linter/formatter
+
     # Container runtime
     colima   # Container runtimes on macOS with minimal setup
     docker   # Docker CLI (works with Colima backend)
