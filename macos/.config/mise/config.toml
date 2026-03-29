@@ -1,6 +1,6 @@
 [tools]
 # Node.js - 最新のLTS版を使用
-nodejs = "lts"
+nodejs = "24"
 pnpm = "latest"  # AI開発RTA用パッケージマネージャー
 
 # 開発で使用する言語とツール
