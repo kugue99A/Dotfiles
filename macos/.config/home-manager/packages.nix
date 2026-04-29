@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   serena = pkgs.writeShellScriptBin "serena" ''
@@ -41,7 +41,7 @@ let
       owner = "coderabbitai";
       repo = "git-worktree-runner";
       rev = "main";
-      sha256 = "1hbp1rfdff19lvdizrmws72avvy4z6q5ajb13gzcgzsqdn0msyf6";
+      hash = "sha256-ltM/QM5sGYJdUbmZQHx7TZa829zG3s0Eh9ZHmZYNWiE=";
     };
     dontBuild = true;
     installPhase = ''
@@ -146,7 +146,6 @@ in
     graphviz      # ER diagram generation (dot command)
 
     # Game development
-    godot_4       # Godot 4 game engine
     gdtoolkit_4   # GDScript linter/formatter
 
     # Container runtime
@@ -175,5 +174,7 @@ in
     git-gtr  # Git worktree runner
     reminder-lint  # Code reminder tool (CyberAgent)
     certbot  # Let's Encrypt certificate management
+  ] ++ lib.optionals stdenv.isLinux [
+    godot_4       # Godot 4 game engine (Linux only)
   ];
 }

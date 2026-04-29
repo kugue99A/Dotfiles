@@ -299,22 +299,25 @@
       sketchybar --add item padding.volume right --set padding.volume width=6
 
       # --- ネットワーク (purple) ---
+      # airport コマンドは macOS Sonoma 以降削除、SSID もプライバシー保護でマスクされるため
+      # アクティブインターフェースの IP アドレスを表示する
       sketchybar --add item network right \
                  --set network \
                    icon.color=$CLR_PURPLE \
                    label.color=$CLR_PURPLE \
                    update_freq=5 \
                    script='
-                     SSID="$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | awk "/ SSID/ {print \$2}")"
-                     if [ -z "$SSID" ]; then
-                       IP="$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)"
+                     IP_WIFI=$(ipconfig getifaddr en0 2>/dev/null)
+                     if [ -n "$IP_WIFI" ]; then
+                       sketchybar --set $NAME icon="󰖩" label="$IP_WIFI"
+                     else
+                       DEF_IF=$(route get default 2>/dev/null | awk "/interface:/ {print \$2}")
+                       IP=$(ipconfig getifaddr "$DEF_IF" 2>/dev/null)
                        if [ -n "$IP" ]; then
                          sketchybar --set $NAME icon="󰈀" label="$IP"
                        else
                          sketchybar --set $NAME icon="󰖪" label="未接続"
                        fi
-                     else
-                       sketchybar --set $NAME icon="󰖩" label="$SSID"
                      fi
                    '
 

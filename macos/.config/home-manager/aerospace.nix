@@ -10,9 +10,9 @@
     enable-normalization-flatten-containers = true
     enable-normalization-opposite-orientation-for-nested-containers = true
 
-    # 起動後にSketchyBarを起動
+    # SketchyBar は launchd (home-manager) が管理するため、AeroSpace からは起動しない
     after-login-command = []
-    after-startup-command = ['exec-and-forget ${pkgs.sketchybar}/bin/sketchybar']
+    after-startup-command = []
 
     # ワークスペース変更時にSketchyBarへ通知
     exec-on-workspace-change = [

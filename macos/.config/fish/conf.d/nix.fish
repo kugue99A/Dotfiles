@@ -19,10 +19,8 @@ if test -d /nix/var/nix/profiles/default/bin
     end
 end
 
-# Set NIX_PATH if not set
-if not set -q NIX_PATH
-    set -gx NIX_PATH "nixpkgs=$HOME/.local/state/nix/profiles/channels/nixpkgs-unstable:$HOME/.nix-defexpr/channels"
-end
+# Set NIX_PATH (always override to ensure correct channel name is used)
+set -gx NIX_PATH "nixpkgs=$HOME/.local/state/nix/profiles/channels/nixpkgs:$HOME/.nix-defexpr/channels"
 
 # Set NIX_SSL_CERT_FILE for macOS
 if test -f /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt
