@@ -14,6 +14,10 @@
     customPaneNavigationAndResize = false;
 
     extraConfig = ''
+      # --- TPM (tmux Plugin Manager) ---
+      set-environment -g TMUX_PLUGIN_MANAGER_PATH '~/.tmux/plugins'
+      set -g @plugin 'tmux-plugins/tpm'
+      set -g @plugin 'Ataraxy-Labs/opensessions'
       # ============================================================
       # Zellij互換キーマップ
       # Prefix: Ctrl+q (Zellijと同じ)
@@ -138,6 +142,9 @@
       set -g pane-active-border-style "fg=#84a0c6"
       set -g message-style "bg=#161821,fg=#c6c8d1"
       set -g mode-style "bg=#84a0c6,fg=#161821"
+
+      # --- TPM bootstrap (末尾に配置必須) ---
+      run '~/.tmux/plugins/tpm/tpm'
     '';
   };
 }

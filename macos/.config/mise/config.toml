@@ -2,6 +2,7 @@
 # Node.js - 最新のLTS版を使用
 nodejs = "24"
 "npm:pnpm" = "latest"  # AI開発RTA用パッケージマネージャー
+bun = "latest"   # opensessions等で使用
 
 # 開発で使用する言語とツール
 go = "latest"

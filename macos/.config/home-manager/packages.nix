@@ -100,6 +100,7 @@ in
     
     # Development tools
     git
+    git-lfs
     gh  # GitHub CLI
     starship
     
@@ -174,6 +175,7 @@ in
     git-gtr  # Git worktree runner
     reminder-lint  # Code reminder tool (CyberAgent)
     certbot  # Let's Encrypt certificate management
+    terminal-notifier  # macOS通知（クリック時のアプリアクティベート対応）
   ] ++ lib.optionals stdenv.isLinux [
     godot_4       # Godot 4 game engine (Linux only)
   ];
