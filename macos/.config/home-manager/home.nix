@@ -12,6 +12,7 @@ in
     ./aerospace.nix
     ./sketchybar.nix
     ./tmux.nix
+    ./herdr.nix
   ];
 
   home.username = local.username;

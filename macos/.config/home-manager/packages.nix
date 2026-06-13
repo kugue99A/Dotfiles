@@ -5,6 +5,13 @@ let
     exec ${pkgs.nix}/bin/nix run github:oraios/serena -- "$@"
   '';
 
+  # Herdr v0.6.10 (https://herdr.dev/docs/install/#install-with-nix)
+  herdr =
+    let
+      flake = builtins.getFlake "git+https://github.com/ogulcancelik/herdr.git?rev=8b99847619235359f4aa87215feac60ac2784499";
+    in
+    flake.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
   # Image textconv for git diff
   git-image-textconv = pkgs.writeShellScriptBin "git-image-textconv" ''
     # Try Kitty protocol first (best quality in WezTerm)
@@ -41,7 +48,7 @@ let
       owner = "coderabbitai";
       repo = "git-worktree-runner";
       rev = "main";
-      hash = "sha256-ltM/QM5sGYJdUbmZQHx7TZa829zG3s0Eh9ZHmZYNWiE=";
+      hash = "sha256-WlpJz0MCf6TU/YGERHgGOxKvdt27sLand9lpKanApSI=";
     };
     dontBuild = true;
     installPhase = ''
@@ -114,6 +121,7 @@ in
     delta  # git diff pager
     ghq    # repository management
     zellij
+    herdr
     zoxide
 
     # Image viewing in terminal
@@ -147,6 +155,8 @@ in
     graphviz      # ER diagram generation (dot command)
 
     # Game development
+    godot_4       # Godot 4 game engine
+    godot-export-templates-bin  # Godot export templates (Web/desktop builds)
     gdtoolkit_4   # GDScript linter/formatter
 
     # Container runtime
@@ -175,8 +185,7 @@ in
     git-gtr  # Git worktree runner
     reminder-lint  # Code reminder tool (CyberAgent)
     certbot  # Let's Encrypt certificate management
+    awscli2  # AWS CLI v2
     terminal-notifier  # macOS通知（クリック時のアプリアクティベート対応）
-  ] ++ lib.optionals stdenv.isLinux [
-    godot_4       # Godot 4 game engine (Linux only)
   ];
 }
