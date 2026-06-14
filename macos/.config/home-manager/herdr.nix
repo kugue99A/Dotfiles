@@ -1,6 +1,11 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
+let
+  toastSoundPath = "${config.home.homeDirectory}/.config/herdr/sounds/tirori-2loops.mp3";
+in
 {
+  home.file.".config/herdr/sounds/tirori-2loops.mp3".source = ./sounds/tirori-2loops.mp3;
+
   home.file.".config/herdr/config.toml".text = ''
     # Herdr keybindings aligned with the local tmux/Zellij-style layout.
     onboarding = false
@@ -9,6 +14,14 @@
     default_shell = "${pkgs.fish}/bin/fish"
     shell_mode = "auto"
     new_cwd = "follow"
+
+    [ui.toast]
+    delivery = "system"
+    delay_seconds = 1
+
+    [ui.sound]
+    enabled = true
+    path = "${toastSoundPath}"
 
     [keys]
     # Herdr supports one real prefix key. Alt/Option bindings below mirror the
@@ -57,7 +70,7 @@
 
     # Keep Herdr resize mode available; direct H/J/K/L resize is below.
     resize_mode = ["prefix+shift+r", "alt+shift+r"]
-    toggle_sidebar = ["prefix+b", "alt+b"]
+    toggle_sidebar = ["prefix+b", "alt+t"]
 
     navigate_pane_left = "h"
     navigate_pane_down = "j"
