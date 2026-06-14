@@ -48,7 +48,7 @@ let
       owner = "coderabbitai";
       repo = "git-worktree-runner";
       rev = "main";
-      hash = "sha256-WlpJz0MCf6TU/YGERHgGOxKvdt27sLand9lpKanApSI=";
+      hash = "sha256-QJcpDq9guLgVjWhF2HwpMxK5ONQZtbDxFZnQrQjCRtI=";
     };
     dontBuild = true;
     installPhase = ''
@@ -70,6 +70,32 @@ let
       cp $out/bin/gtr $out/bin/git-gtr
     '';
   };
+
+  # terminal-notifier を WezTerm のアイコン/起動先に固定するラッパー。
+  # Herdr が `terminal-notifier` を PATH で探すので、同名で前に置く。
+  terminal-notifier-wezterm = pkgs.writeShellScriptBin "terminal-notifier" ''
+    args=()
+    skip=0
+    for a in "$@"; do
+      if [ "$skip" = "1" ]; then
+        skip=0
+        continue
+      fi
+      case "$a" in
+        -sender|-activate)
+          skip=1
+          continue
+          ;;
+        *)
+          args+=("$a")
+          ;;
+      esac
+    done
+    exec ${pkgs.terminal-notifier}/bin/terminal-notifier \
+      "''${args[@]}" \
+      -sender com.github.wez.wezterm \
+      -activate com.github.wez.wezterm
+  '';
 
   lazygit-diff = pkgs.writeShellScriptBin "lazygit-diff" ''
     # Check if we're diffing an image file
@@ -155,8 +181,8 @@ in
     graphviz      # ER diagram generation (dot command)
 
     # Game development
-    godot_4       # Godot 4 game engine
-    godot-export-templates-bin  # Godot export templates (Web/desktop builds)
+    # godot_4 / godot-export-templates-bin は nixpkgs で Linux 限定のため macOS では除外。
+    # macOS では `brew install --cask godot` で Godot 本体を導入する。
     gdtoolkit_4   # GDScript linter/formatter
 
     # Container runtime
@@ -186,6 +212,6 @@ in
     reminder-lint  # Code reminder tool (CyberAgent)
     certbot  # Let's Encrypt certificate management
     awscli2  # AWS CLI v2
-    terminal-notifier  # macOS通知（クリック時のアプリアクティベート対応）
+    terminal-notifier-wezterm  # WezTermのアイコン/起動先に固定したterminal-notifierラッパー
   ];
 }
