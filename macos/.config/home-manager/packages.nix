@@ -158,8 +158,8 @@ in
     # Language servers for existing Neovim setup
     lua-language-server
     nil  # Nix LSP
-    nodePackages.typescript-language-server
-    nodePackages.vscode-langservers-extracted
+    typescript-language-server
+    vscode-langservers-extracted
     gopls
     rust-analyzer
     markdown-oxide  # Markdown LSP

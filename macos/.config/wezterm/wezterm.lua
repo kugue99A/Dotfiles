@@ -5,6 +5,11 @@ local config = wezterm.config_builder()
 config.font = wezterm.font("SauceCodePro Nerd Font Mono")
 config.font_size = 13
 
+-- 左右どちらの Option キーも Alt/Meta として送る
+-- (デフォルトは右 Option が合成入力になり Herdr の alt+... が効かないため)
+config.send_composed_key_when_left_alt_is_pressed = false
+config.send_composed_key_when_right_alt_is_pressed = false
+
 -- Default shell - use fish (Nix-managed)
 config.default_prog = { wezterm.home_dir .. "/.nix-profile/bin/fish" }
 
