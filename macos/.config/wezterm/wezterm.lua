@@ -103,6 +103,10 @@ config.visual_bell = {
 }
 -- ベル時にmacOS通知センターにも通知を送る（バックグラウンドで動作）
 config.notification_handling = "AlwaysShow"
+
+-- 右Option も Alt として扱う（Herdr 等の alt+ キーバインドを両 Option で発火させる）
+config.send_composed_key_when_left_alt_is_pressed = false
+config.send_composed_key_when_right_alt_is_pressed = false
 config.keys = {
 	{
 		key = "Enter",
