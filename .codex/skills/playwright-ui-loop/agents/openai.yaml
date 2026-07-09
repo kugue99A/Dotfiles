@@ -1,0 +1,4 @@
+interface:
+  display_name: "Playwright UI Loop"
+  short_description: "PlaywrightでUI改善と回帰検証を反復実行"
+  default_prompt: "Use $playwright-ui-loop to reproduce, inspect, fix, and verify this UI issue with browser evidence."
