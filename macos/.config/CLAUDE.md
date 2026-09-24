@@ -36,7 +36,7 @@ This is a personal configuration directory (`~/.config`) containing dotfiles and
 
 ### File Listing (LSD)
 - **Configuration**: `lsd/config.yaml`
-- **Theme**: Custom Iceberg theme (`lsd/themes/iceberg.yml`)
+- **Theme**: Custom Iceberg theme (`lsd/colors.yaml`)
 - **Usage**: Replaces `ls` command via fish alias
 
 ### Git UI (Lazygit)

@@ -15,7 +15,7 @@ local function apply_highlights()
 	set_hl("LineNr", { bg = "NONE" })
 	set_hl("Folded", { bg = "NONE" })
 	set_hl("EndOfBuffer", { bg = "NONE" })
-	
+
 	-- Transparent tabline/bufferline
 	set_hl("TabLine", { bg = "NONE" })
 	set_hl("TabLineFill", { bg = "NONE" })
@@ -80,12 +80,6 @@ local function apply_highlights()
 		set_hl(group, { bg = "NONE" })
 	end
 
-	-- Telescope highlights
-	set_hl("TelescopeBorder", { fg = "#565f89" })
-	set_hl("TelescopePromptBorder", { fg = "#ff9e64" })
-	set_hl("TelescopeResultsBorder", { fg = "#565f89" })
-	set_hl("TelescopePreviewBorder", { fg = "#565f89" })
-
 	-- LSP reference highlights
 	set_hl("LspReferenceText", { bg = "#3b4261", underline = false })
 	set_hl("LspReferenceRead", { bg = "#3b4261", underline = false })
@@ -108,4 +102,3 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 apply_highlights()
 
 return M
-

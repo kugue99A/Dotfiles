@@ -8,8 +8,8 @@ gui:
       - '#a89984'
     selectedLineBgColor:
       - '#3c3836'
-
 git:
-  paging:
-    colorArg: always
-    useConfig: true
+  diffRenderers:
+    - colorArg: always
+      useConfig: true
+      type: rawGit

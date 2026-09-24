@@ -53,6 +53,16 @@ All applications use the **Gruvbox Dark** theme for visual consistency.
    ./dotfiles apply
    ```
 
+### Symphony Orchestration
+
+This repository has a Symphony workflow contract in `WORKFLOW.md` for running Codex from Linear issues in isolated workspaces. See `SYMPHONY.md` for setup and safety rules.
+
+### Local LLM for Herdr
+
+The local llama.cpp + Muse Glimmer + OpenCode stack is managed by Home Manager.
+See [LOCAL_LLM.md](LOCAL_LLM.md) for operation, Herdr usage, and the measured
+DFlash policy.
+
 ## Features
 
 ### Automatic Backup

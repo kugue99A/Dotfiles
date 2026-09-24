@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   toastSoundPath = "${config.home.homeDirectory}/.config/herdr/sounds/tirori-2loops.mp3";
@@ -14,6 +14,18 @@ in
     default_shell = "${pkgs.fish}/bin/fish"
     shell_mode = "auto"
     new_cwd = "follow"
+
+    [ui]
+    sidebar_min_width = 36
+    sidebar_max_width = 36
+
+    [ui.sidebar.agents]
+    row_gap = 0
+    rows = [
+      ["state_icon", "$title"],
+      ["$provider", "$limit"],
+      ["$context"],
+    ]
 
     [ui.toast]
     delivery = "system"
@@ -97,5 +109,22 @@ in
     key = ["prefix+shift+l", "alt+shift+l"]
     type = "shell"
     command = "herdr pane resize --direction right --amount 5 --current"
+  '';
+
+  # Keep the Agent Usage plugin present alongside the Home Manager config.
+  # The plugin owns its own versioned binary and startup hook; only install it
+  # when it is not already registered with Herdr.
+  home.activation.herdrAgentUsagePlugin = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    herdr() {
+      ${pkgs.mise}/bin/mise exec -- herdr "$@"
+    }
+
+    if herdr --version >/dev/null 2>&1; then
+      if ! herdr plugin list --json | ${pkgs.jq}/bin/jq -e '.result.plugins[]? | select(.plugin_id == "usagebar")' >/dev/null 2>&1; then
+        herdr plugin install senna-lang/herdr-agent-usage --yes
+      fi
+    else
+      echo "warning: Herdr is not installed; run 'mise install' to enable Agent Usage" >&2
+    fi
   '';
 }

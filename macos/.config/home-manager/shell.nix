@@ -18,6 +18,10 @@
     shellInit = ''
       # Disable fish greeting
       set fish_greeting
+
+      # Prefer Home Manager packages over macOS system binaries. --move also
+      # repairs inherited PATH ordering without accumulating duplicates.
+      fish_add_path --prepend --move $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin
       
       # Starship prompt
       if command -v starship >/dev/null
@@ -38,10 +42,10 @@
       # Go environment
       set -x GOPATH $HOME/go
       set -x GOBIN $GOPATH/bin
-      set -x PATH $PATH:$GOBIN
+      fish_add_path --append --move $GOBIN
       
       # Add local bin to PATH
-      set -x PATH $HOME/.local/bin $PATH
+      fish_add_path --prepend --move $HOME/.local/bin
       
       # Mise activation
       if command -v mise >/dev/null
@@ -73,6 +77,17 @@
       ".." = "cd ..";
       "..." = "cd ../..";
       "...." = "cd ../../..";
+
+      # Compatibility alias. The server configuration lives in local-llm.nix.
+      glimmer = ''
+        local-llm start
+        and local-llm status
+      '';
+
+      # Herdr detects the resulting OpenCode process as a native agent.
+      local-code = ''
+        local-llm code $argv
+      '';
 
       # Benchmark: Fish startup time
       "bench-fish" = ''

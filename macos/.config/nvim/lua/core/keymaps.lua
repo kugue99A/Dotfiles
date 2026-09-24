@@ -82,7 +82,7 @@ keymap("n", "<leader>fy", function()
 	vim.notify("Copied filename: " .. path, vim.log.levels.INFO)
 end, { desc = "Copy filename" })
 
--- Search and replace (moved to avoid conflict with telescope)
+-- Search and replace
 keymap(
 	"n",
 	"<leader>sr",
@@ -128,14 +128,14 @@ keymap("n", "<leader>E", "<cmd>Neotree toggle float<CR>", { desc = "Explorer Neo
 keymap("n", "<leader>fe", "<cmd>Neotree toggle<CR>", { desc = "Explorer NeoTree (root dir)" })
 keymap("n", "<leader>fE", "<cmd>Neotree toggle float<CR>", { desc = "Explorer NeoTree (float)" })
 keymap("n", "<C-f>", function()
-  local current_file = vim.fn.expand("%:p")
-  if current_file ~= "" and vim.fn.filereadable(current_file) == 1 then
-    -- Open Neo-tree and reveal current file
-    vim.cmd("Neotree reveal")
-  else
-    -- Just toggle Neo-tree if no file
-    vim.cmd("Neotree toggle")
-  end
+	local current_file = vim.fn.expand("%:p")
+	if current_file ~= "" and vim.fn.filereadable(current_file) == 1 then
+		-- Open Neo-tree and reveal current file
+		vim.cmd("Neotree reveal")
+	else
+		-- Just toggle Neo-tree if no file
+		vim.cmd("Neotree toggle")
+	end
 end, { desc = "Reveal current file in explorer" })
 
 -- Terminal mappings
@@ -158,11 +158,17 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end
 
 		-- Hover (K is standard)
-		map("n", "K", vim.lsp.buf.hover, "Show hover documentation")
+		map("n", "K", function()
+			vim.lsp.buf.hover({ border = "rounded", title = "Hover" })
+		end, "Show hover documentation")
 
 		-- Signature help
-		map("n", "<C-k>", vim.lsp.buf.signature_help, "Show signature help")
-		map("i", "<C-k>", vim.lsp.buf.signature_help, "Show signature help")
+		map("n", "<C-k>", function()
+			vim.lsp.buf.signature_help({ border = "rounded", title = "Signature Help" })
+		end, "Show signature help")
+		map("i", "<C-k>", function()
+			vim.lsp.buf.signature_help({ border = "rounded", title = "Signature Help" })
+		end, "Show signature help")
 
 		-- Workspace
 		map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, "Add workspace folder")
@@ -190,11 +196,11 @@ end, { desc = "Show Neovim startup time profile" })
 
 -- Open current file in Obsidian
 keymap("n", "<leader>ob", function()
-  local filepath = vim.fn.expand("%:p")
-  if filepath == "" then
-    vim.notify("No file in buffer", vim.log.levels.WARN)
-    return
-  end
-  local uri = "obsidian://open?path=" .. vim.uri_encode(filepath, "rfc2396")
-  vim.fn.system({ "open", uri })
+	local filepath = vim.fn.expand("%:p")
+	if filepath == "" then
+		vim.notify("No file in buffer", vim.log.levels.WARN)
+		return
+	end
+	local uri = "obsidian://open?path=" .. vim.uri_encode(filepath, "rfc2396")
+	vim.fn.system({ "open", uri })
 end, { desc = "Open in Obsidian" })

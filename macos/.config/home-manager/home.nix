@@ -10,9 +10,12 @@ in
     ./git.nix
     ./terminal.nix
     ./aerospace.nix
+    ./aerokit.nix
     ./sketchybar.nix
     ./tmux.nix
     ./herdr.nix
+    ./local-llm.nix
+    ./agent-skills.nix
   ];
 
   home.username = local.username;

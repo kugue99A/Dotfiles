@@ -1,7 +1,7 @@
 [tools]
 # Node.js - 最新のLTS版を使用
 nodejs = "24"
-"npm:pnpm" = "latest"  # AI開発RTA用パッケージマネージャー
+"aqua:pnpm/pnpm" = "latest"  # 署名検証済みネイティブ配布物を使用
 bun = "latest"   # opensessions等で使用
 
 # 開発で使用する言語とツール
@@ -15,6 +15,9 @@ fd = "latest"
 bat = "latest"
 fzf = "latest"
 bottom = "latest"  # システムモニター (btm コマンド)
+herdr = "latest"   # ターミナル向けエージェントマルチプレクサ (https://github.com/ogulcancelik/herdr)
+hunk = "latest"    # レビュー特化のTUI diffビューア (https://github.com/modem-dev/hunk)
+opencode = "latest" # ローカルLLMを利用するHerdr対応コーディングエージェント
 
 # Language Servers for Neovim
 # TypeScript Language Server via npm
@@ -49,7 +52,8 @@ uv = "latest"
 EDITOR = "nvim"
 VISUAL = "nvim"
 # GitHub API トークン（mise install 時のレートリミット回避）
-GITHUB_API_TOKEN = "{{exec(command='gh auth token')}}"
+# Keep mise usable even before gh auth login.
+GITHUB_API_TOKEN = "{{exec(command='gh auth token 2>/dev/null || true')}}"
 
 [settings]
 # 実験的機能を有効化

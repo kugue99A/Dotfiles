@@ -1,10 +1,22 @@
 { pkgs, ... }:
 
 {
+  launchd.agents.aerospace = {
+    enable = true;
+    config = {
+      Program = "${pkgs.aerospace}/Applications/AeroSpace.app/Contents/MacOS/AeroSpace";
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/aerospace.log";
+      StandardErrorPath = "/tmp/aerospace.err.log";
+    };
+  };
+
   # Raw TOML で直接記述 (Nix TOML ジェネレータはドットキー形式を出力できないため)
   # パッケージは packages.nix でインストール済み
   home.file.".config/aerospace/aerospace.toml".text = ''
-    start-at-login = true
+    # Home Manager の launchd agent でログイン時に起動する
+    start-at-login = false
 
     # ウィンドウ正規化
     enable-normalization-flatten-containers = true
@@ -36,30 +48,11 @@
     check-further-callbacks = true
     run = ['exec-and-forget /bin/bash -c "${pkgs.sketchybar}/bin/sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$(${pkgs.aerospace}/bin/aerospace list-workspaces --focused)"']
 
-    # 特定アプリをフローティングで開く
+    # AeroSpaceが検出した全ウィンドウをタイル管理対象にする。
+    # app-name-regex-substring は空でないアプリ名に対して常にマッチする。
     [[on-window-detected]]
-    if.app-id = 'com.apple.systempreferences'
-    run = 'layout floating'
-
-    [[on-window-detected]]
-    if.app-id = 'com.apple.calculator'
-    run = 'layout floating'
-
-    [[on-window-detected]]
-    if.app-id = 'com.apple.ActivityMonitor'
-    run = 'layout floating'
-
-    [[on-window-detected]]
-    if.app-id = 'com.apple.AppStore'
-    run = 'layout floating'
-
-    [[on-window-detected]]
-    if.app-id = 'com.apple.Passwords'
-    run = 'layout floating'
-
-    [[on-window-detected]]
-    if.app-id = 'com.apple.keychainaccess'
-    run = 'layout floating'
+    if.app-name-regex-substring = '.*'
+    run = 'layout tiling'
 
     # メインモード キーバインド
     [mode.main.binding]

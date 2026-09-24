@@ -1,82 +1,71 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
-	build = ":TSUpdate",
-	event = { "BufReadPre", "BufNewFile" },
+	lazy = false,
+	build = function()
+		if vim.fn.executable("tree-sitter") == 1 then
+			vim.cmd("TSUpdate")
+		end
+	end,
 	config = function()
-		require("nvim-treesitter.configs").setup({
-			-- A list of parser names, or "all" (the listed parsers MUST always be installed)
-			ensure_installed = {
-				"c",
-				"lua",
-				"vim",
-				"vimdoc",
-				"query",
-				"markdown",
-				"markdown_inline",
-				"javascript",
-				"typescript",
-				"tsx",
-				"json",
-				"yaml",
-				"html",
-				"css",
-				"bash",
-				"dockerfile",
-				"gitignore",
-				"rust",
-				"go",
-				"python",
-			},
+		local treesitter = require("nvim-treesitter")
+		local install_dir = vim.fn.stdpath("data") .. "/site"
+		local languages = {
+			"bash",
+			"c",
+			"css",
+			"dockerfile",
+			"gitignore",
+			"go",
+			"html",
+			"javascript",
+			"json",
+			"lua",
+			"markdown",
+			"markdown_inline",
+			"python",
+			"query",
+			"rust",
+			"tsx",
+			"typescript",
+			"vim",
+			"vimdoc",
+			"yaml",
+		}
 
-			-- Install parsers synchronously (only applied to `ensure_installed`)
-			sync_install = false,
+		treesitter.setup({ install_dir = install_dir })
+		vim.opt.runtimepath:prepend(install_dir)
 
-			-- Automatically install missing parsers when entering buffer
-			-- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-			auto_install = true,
+		if vim.fn.executable("tree-sitter") == 1 then
+			treesitter.install(languages)
+		end
 
-			-- List of parsers to ignore installing (or "all")
-			ignore_install = {},
+		local language_set = {}
+		for _, language in ipairs(languages) do
+			language_set[language] = true
+		end
 
-			---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-			-- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+		local function is_large_file(bufnr)
+			local name = vim.api.nvim_buf_get_name(bufnr)
+			if name == "" then
+				return false
+			end
+			local ok, stats = pcall(vim.uv.fs_stat, name)
+			return ok and stats and stats.size > 100 * 1024
+		end
 
-			highlight = {
-				enable = true,
+		local group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true })
+		vim.api.nvim_create_autocmd("FileType", {
+			group = group,
+			callback = function(args)
+				local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+				if not lang or not language_set[lang] or is_large_file(args.buf) then
+					return
+				end
 
-				-- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-				-- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-				-- the name of the parser)
-				-- list of language that will be disabled
-				disable = function(lang, buf)
-					local max_filesize = 100 * 1024 -- 100 KB
-					local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-					if ok and stats and stats.size > max_filesize then
-						return true
-					end
-				end,
-
-				-- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-				-- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-				-- Using this option may slow down your editor, and you may see some duplicate highlights.
-				-- Instead of true it can also be a list of languages
-				additional_vim_regex_highlighting = false,
-			},
-
-			indent = {
-				enable = true,
-			},
-
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "gnn", -- set to `false` to disable one of the mappings
-					node_incremental = "grn",
-					scope_incremental = "grc",
-					node_decremental = "grm",
-				},
-			},
+				if pcall(vim.treesitter.start, args.buf, lang) then
+					vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+				end
+			end,
 		})
 	end,
 }
-

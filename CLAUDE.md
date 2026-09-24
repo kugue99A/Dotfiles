@@ -108,7 +108,8 @@ macos/.config/          # Source configurations
 │   ├── git.nix         # Git configuration
 │   ├── terminal.nix    # Terminal emulator settings
 │   ├── aerospace.nix   # Window manager configuration
-│   └── sketchybar.nix  # Status bar configuration
+│   ├── sketchybar.nix  # Status bar configuration
+│   └── agent-skills.nix # Claude Code / Codex 共通のグローバル Agent Skills (mattpocock/skills)
 ├── mise/               # Runtime version management
 └── raycast/            # Raycast extensions (built, not source)
 ```
@@ -299,6 +300,18 @@ To modify Fish functions, edit `shell.nix` and run `home-manager switch`.
 |--------|---------|------|
 | Nix Home-Manager | `/nix-home-manager` | Nix/Home-Manager設定の詳細ガイド、パターン、トラブルシューティング |
 | AeroSpace + SketchyBar | `/sketchybar-aerospace` | ウィンドウマネージャとステータスバーの設定ガイド |
+
+### グローバルスキル（Nix 管理・全マシン共通）
+
+`macos/.config/home-manager/agent-skills.nix` が [mattpocock/skills](https://github.com/mattpocock/skills) を Nix の `fetchFromGitHub` で固定取得し、`~/.claude/skills/` と `~/.codex/skills/` の両方へ symlink する。Claude Code / Codex どちらでも同じスキルが使える。
+
+| スキル | Claude Code | Codex | 説明 |
+|--------|-------------|-------|------|
+| grilling | `grill` 系の言い回しでモデルが自動発動 | 同左 | 設計・計画を厳しくインタビューして決定漏れを潰す本体 |
+| grill-me | `/grill-me` | `$grill-me` | ユーザー呼び出し専用。grilling を呼ぶ薄いラッパー |
+
+- スキルを追加する: `agent-skills.nix` の `skills` に `<名前> = "skills/<カテゴリ>/<名前>";` を足して `home-manager switch`
+- upstream を更新する: `rev` を差し替え、`nix-prefetch-url --unpack https://github.com/mattpocock/skills/archive/<rev>.tar.gz` の出力を `nix hash to-sri --type sha256` で SRI にして `hash` に入れる
 
 ### 使い方
 

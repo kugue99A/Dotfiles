@@ -5,12 +5,46 @@ let
     exec ${pkgs.nix}/bin/nix run github:oraios/serena -- "$@"
   '';
 
-  # Herdr v0.6.10 (https://herdr.dev/docs/install/#install-with-nix)
-  herdr =
+  # zmk-battery-center v0.12.0
+  # ZMK split keyboard battery monitor app.
+  zmk-battery-center =
     let
-      flake = builtins.getFlake "git+https://github.com/ogulcancelik/herdr.git?rev=8b99847619235359f4aa87215feac60ac2784499";
+      version = "0.12.0";
+      source = {
+        aarch64-darwin = {
+          arch = "aarch64";
+          hash = "sha256-pwFuniHAZviQQn9djxGcTuJvuUt02jd3XQA93HiE8y4=";
+        };
+        x86_64-darwin = {
+          arch = "x64";
+          hash = "sha256-PeakMpmiGx86ytzbJCFJeT0RxMPu+GZ4DUMOyZM16Do=";
+        };
+      }.${pkgs.stdenv.hostPlatform.system} or (throw "zmk-battery-center is only packaged for Darwin");
     in
-    flake.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    pkgs.stdenvNoCC.mkDerivation {
+      pname = "zmk-battery-center";
+      inherit version;
+
+      src = pkgs.fetchurl {
+        url = "https://github.com/kot149/zmk-battery-center/releases/download/v${version}/zmk-battery-center_${version}_${source.arch}.app.tar.gz";
+        inherit (source) hash;
+      };
+
+      sourceRoot = ".";
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+
+      installPhase = ''
+        runHook preInstall
+
+        mkdir -p "$out/Applications" "$out/bin"
+        cp -R zmk-battery-center.app "$out/Applications/"
+
+        makeWrapper /usr/bin/open "$out/bin/zmk-battery-center" \
+          --add-flags "$out/Applications/zmk-battery-center.app"
+
+        runHook postInstall
+      '';
+    };
 
   # Image textconv for git diff
   git-image-textconv = pkgs.writeShellScriptBin "git-image-textconv" ''
@@ -43,12 +77,12 @@ let
   # Git worktree runner (https://github.com/coderabbitai/git-worktree-runner)
   git-gtr = pkgs.stdenv.mkDerivation {
     pname = "git-gtr";
-    version = "2.4.0";
+    version = "2.11.1";
     src = pkgs.fetchFromGitHub {
       owner = "coderabbitai";
       repo = "git-worktree-runner";
-      rev = "main";
-      hash = "sha256-QJcpDq9guLgVjWhF2HwpMxK5ONQZtbDxFZnQrQjCRtI=";
+      rev = "v2.11.1";
+      hash = "sha256-w15Todxvy6VyVE3EryOq4lAb0uUaLvunRjNW+xIdgi8=";
     };
     dontBuild = true;
     installPhase = ''
@@ -135,6 +169,7 @@ in
     git
     git-lfs
     gh  # GitHub CLI
+    mise  # Runtime/tool version manager
     starship
     
     # Essential CLI tools
@@ -147,19 +182,21 @@ in
     delta  # git diff pager
     ghq    # repository management
     zellij
-    herdr
     zoxide
+    zmk-battery-center
 
     # Image viewing in terminal
     chafa  # Image-to-text converter with multiple protocol support
     viu    # Image viewer for terminal
     imagemagick  # Required by snacks.nvim image (format conversion)
+    poppler-utils  # PDF inspection/rendering (pdfinfo, pdftotext, pdftoppm)
     
     # Language servers for existing Neovim setup
     lua-language-server
     nil  # Nix LSP
     typescript-language-server
     vscode-langservers-extracted
+    tree-sitter  # Parser CLI required by nvim-treesitter main
     gopls
     rust-analyzer
     markdown-oxide  # Markdown LSP
@@ -211,6 +248,7 @@ in
     git-gtr  # Git worktree runner
     reminder-lint  # Code reminder tool (CyberAgent)
     certbot  # Let's Encrypt certificate management
+    google-cloud-sdk  # Google Cloud CLI (gcloud) for GA4 MCP ADC setup
     awscli2  # AWS CLI v2
     terminal-notifier-wezterm  # WezTermのアイコン/起動先に固定したterminal-notifierラッパー
   ];
