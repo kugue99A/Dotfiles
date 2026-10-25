@@ -172,11 +172,7 @@ in
     mise  # Runtime/tool version manager
     starship
     
-    # Essential CLI tools
-    ripgrep
-    fd
-    bat
-    fzf
+    # Essential CLI tools (versioned through mise)
     lsd
     lazygit
     delta  # git diff pager
@@ -203,11 +199,8 @@ in
     pyright  # Python LSP
     
     # Development languages
-    go
     rustc
     cargo
-    python3
-    lua5_4
     pkg-config
 
     # epoch-lab-server development tools

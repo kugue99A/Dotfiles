@@ -1,0 +1,49 @@
+diff --git a/internal/limits/claudecache.go b/internal/limits/claudecache.go
+index f825411..df187bf 100644
+--- a/internal/limits/claudecache.go
++++ b/internal/limits/claudecache.go
+@@ -12,6 +12,8 @@ import (
+ 	"path/filepath"
+ )
+ 
++const claudeStaleAfterMinutes = 30
++
+ // RateLimitsInput is the statusLine rate_limits shape.
+ type RateLimitsInput struct {
+ 	FiveHour *struct {
+@@ -156,9 +158,13 @@ func collectFromStatusLineCache(nowMs int64, path string) *ProviderLimits {
+ 		Source:      "claude statusLine cache",
+ 		FetchedAtMs: fetched,
+ 	}
+-	if ageMin > 30 {
+-		note := "stale ~" + itoa(ageMin) + "m ago"
++	if ageMin > claudeStaleAfterMinutes {
++		note := "stale ~" + itoa(ageMin) + "m ago; live Claude statusLine unavailable"
+ 		out.Note = &note
++		// A stale cache can make a depleted account look healthy. Keep the
++		// diagnostic, but do not render expired numbers as current quota.
++		out.Primary = nil
++		out.Secondary = nil
+ 	}
+ 	return &out
+ }
+diff --git a/internal/limits/claudejson.go b/internal/limits/claudejson.go
+index 9d9ffcc..854b1c2 100644
+--- a/internal/limits/claudejson.go
++++ b/internal/limits/claudejson.go
+@@ -127,9 +127,13 @@ func ProviderLimitsFromClaudeJSON(rawJSON string, nowMs int64) *ProviderLimits {
+ 		Source:      "claude.json cachedUsageUtilization",
+ 		FetchedAtMs: fetchedAtMs,
+ 	}
+-	if ageMin > 120 {
+-		note := "stale ~" + itoa(ageMin) + "m ago"
++	if ageMin > claudeStaleAfterMinutes {
++		note := "stale ~" + itoa(ageMin) + "m ago; live Claude statusLine unavailable"
+ 		out.Note = &note
++		// cachedUsageUtilization is also a snapshot. Once it is stale, prefer
++		// no number over presenting a potentially misleading remaining percent.
++		out.Primary = nil
++		out.Secondary = nil
+ 	}
+ 	return &out
+ }

@@ -23,16 +23,8 @@
       # repairs inherited PATH ordering without accumulating duplicates.
       fish_add_path --prepend --move $HOME/.nix-profile/bin /nix/var/nix/profiles/default/bin
       
-      # Starship prompt
-      if command -v starship >/dev/null
-        starship init fish | source
-      end
-      
-      # Zoxide
-      if command -v zoxide >/dev/null
-        zoxide init fish | source
-      end
-      
+      # Terminal integrations are sourced from pre-generated scripts in terminal.nix.
+
       # Custom cd function that also lists directory contents
       function cd
         builtin cd $argv[1]
@@ -56,7 +48,7 @@
       set -l _gtr_init (test -n "$XDG_CACHE_HOME" && echo $XDG_CACHE_HOME || echo $HOME/.cache)/gtr/init-gtr.fish
       test -f "$_gtr_init"; or git gtr init fish >/dev/null 2>&1
       # Fix Fish 4.x block-scoping bug: use -f (function scope) instead of -l (block scope)
-      if test -f "$_gtr_init"; and grep -q 'set -l _gtr_key' "$_gtr_init"
+      if test -f "$_gtr_init"; and string match -q '*set -l _gtr_key*' < "$_gtr_init"
         sed -i "" 's/set -l _gtr_key/set -f _gtr_key/g;s/set -l _gtr_line/set -f _gtr_line/g' "$_gtr_init"
       end
       source "$_gtr_init" 2>/dev/null
@@ -155,6 +147,52 @@
         echo ""
         echo "=== Hyperfine Benchmark ==="
         hyperfine --warmup 3 --runs 10 "nvim --headless +quit"
+      '';
+
+      # Switch WezTerm and running Neovim instances between TokyoNight themes.
+      theme = ''
+        set -l state_dir (test -n "$XDG_STATE_HOME"; and echo $XDG_STATE_HOME; or echo $HOME/.local/state)/dotfiles
+        set -l state_file $state_dir/theme
+        set -l current dark
+        if test -f $state_file
+            read current < $state_file
+        end
+
+        set -l mode $argv[1]
+        if test (count $argv) -eq 0
+            set mode toggle
+        end
+
+        if test "$mode" = status
+            echo $current
+            return 0
+        end
+
+        switch $mode
+            case toggle
+                if test "$current" = light
+                    set mode dark
+                else
+                    set mode light
+                end
+            case light dark
+            case '*'
+                echo "Usage: theme [light|dark|toggle|status]"
+                return 2
+        end
+
+        mkdir -p $state_dir
+        printf '%s\\n' $mode > $state_file.tmp
+        mv $state_file.tmp $state_file
+
+        if command -q herdr
+            herdr server reload-config >/dev/null 2>&1
+        end
+        if command -q sketchybar
+            sketchybar --reload >/dev/null 2>&1
+        end
+
+        echo "Theme: $mode"
       '';
     };
   };

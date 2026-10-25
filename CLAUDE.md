@@ -309,6 +309,8 @@ To modify Fish functions, edit `shell.nix` and run `home-manager switch`.
 |--------|-------------|-------|------|
 | grilling | `grill` 系の言い回しでモデルが自動発動 | 同左 | 設計・計画を厳しくインタビューして決定漏れを潰す本体 |
 | grill-me | `/grill-me` | `$grill-me` | ユーザー呼び出し専用。grilling を呼ぶ薄いラッパー |
+| grill-with-docs | `/grill-with-docs` | `$grill-with-docs` | ユーザー呼び出し専用。grilling + domain-modeling を呼び、`CONTEXT.md` / `docs/adr/` を書きながら詰める |
+| domain-modeling | 用語・CONTEXT.md・ADR の話題でモデルが自動発動 | 同左 | grill-with-docs の書き出し側。単体でも使える |
 
 - スキルを追加する: `agent-skills.nix` の `skills` に `<名前> = "skills/<カテゴリ>/<名前>";` を足して `home-manager switch`
 - upstream を更新する: `rev` を差し替え、`nix-prefetch-url --unpack https://github.com/mattpocock/skills/archive/<rev>.tar.gz` の出力を `nix hash to-sri --type sha256` で SRI にして `hash` に入れる

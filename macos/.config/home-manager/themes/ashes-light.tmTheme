@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>Ashes Light</string>
+	<key>settings</key>
+	<array>
+		<dict>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#1C2023</string>
+				<key>background</key>
+				<string>#F3F4F5</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>codex.accent</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#637C8D</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>comment, punctuation.definition.comment</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#747C84</string>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>string, punctuation.definition.string</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#5D8F78</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>constant, constant.numeric, constant.language, support.constant</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#8B74A1</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>keyword, storage, storage.type, entity.name.tag</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#A47F91</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>entity.name.function, support.function, variable.function</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#8B74A1</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>entity.name.type, support.type, entity.name.class</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#6F899B</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>markup.heading, entity.name.section</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#1C2023</string>
+				<key>fontStyle</key>
+				<string>bold</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>markup.quote</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#747C84</string>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>markup.underline.link, string.other.link</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#6F899B</string>
+				<key>fontStyle</key>
+				<string>underline</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>markup.inserted, diff.inserted</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#5D8F78</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>markup.deleted, diff.deleted</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#A47F91</string>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

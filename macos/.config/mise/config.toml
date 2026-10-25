@@ -44,17 +44,22 @@ uv = "latest"
 "cargo:stylua" = "latest"
 "go:github.com/d-kuro/gwq/cmd/gwq" = "latest"
 
-# AI/Codex tools
-"npm:@openai/codex" = "latest"
+# Codex CLI is installed globally with npm under mise-managed Node.js.
 
 [env]
 # 共通の環境変数
 EDITOR = "nvim"
 VISUAL = "nvim"
-# GitHub API トークン（mise install 時のレートリミット回避）
-# Keep mise usable even before gh auth login.
-GITHUB_API_TOKEN = "{{exec(command='gh auth token 2>/dev/null || true')}}"
+# Codex is npm-installed under Node 24.19. Keep it visible to `mise exec`
+# even when the selected Node 24 patch version changes.
+_.path = ["~/.local/share/mise/installs/node/24.19.0/bin"]
 
 [settings]
 # 実験的機能を有効化
 experimental = true
+# Resolve versions from upstream; the shared index listed missing OpenCode releases.
+use_versions_host = false
+
+[settings.github]
+# Fetch credentials only when GitHub access is needed, not on every shell hook.
+credential_command = "gh auth token 2>/dev/null || true"

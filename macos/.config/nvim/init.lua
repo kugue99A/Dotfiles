@@ -3,6 +3,9 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+-- Read the shared theme before plugins load, then follow changes from `theme`.
+require("core.theme").setup()
+
 -- Set language to English (modern approach)
 vim.cmd.language("en_US.UTF-8")
 

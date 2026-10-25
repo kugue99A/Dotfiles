@@ -8,62 +8,119 @@ end
 
 -- Auto command to set highlights after colorscheme changes
 local function apply_highlights()
-	-- Transparent background
-	set_hl("Normal", { bg = "NONE" })
-	set_hl("NormalNC", { bg = "NONE" })
-	set_hl("SignColumn", { bg = "NONE" })
-	set_hl("LineNr", { bg = "NONE" })
-	set_hl("Folded", { bg = "NONE" })
-	set_hl("EndOfBuffer", { bg = "NONE" })
+	local is_ashes = vim.g.colors_name == "ashes-light"
+	local colors
+	if is_ashes then
+		local terminal = {
+			black = "#1C2023",
+			red = "#C7AE95",
+			green = "#95C7AE",
+			yellow = "#AEC795",
+			blue = "#AE95C7",
+			magenta = "#C795AE",
+			cyan = "#95AEC7",
+			white = "#C7CCD1",
+			black_bright = "#747C84",
+			red_bright = "#C7AE95",
+			green_bright = "#95C7AE",
+			yellow_bright = "#AEC795",
+			blue_bright = "#AE95C7",
+			magenta_bright = "#C795AE",
+			cyan_bright = "#95AEC7",
+			white_bright = "#F3F4F5",
+		}
+		colors = {
+			bg = "#F3F4F5",
+			bg_dark = "#E5E6E7",
+			bg_popup = "#E5E6E7",
+			bg_highlight = "#DDE0E3",
+			bg_visual = "#C7CCD1",
+			bg_search = "#AEC795",
+			border_highlight = "#747C84",
+			fg = "#565E65",
+			comment = "#747C84",
+			red = "#C79595",
+			orange = "#C7AE95",
+			yellow = "#AEC795",
+			green = "#95C7AE",
+			blue = "#AE95C7",
+			magenta = "#C795AE",
+			cyan = "#95AEC7",
+			error = "#C79595",
+			warning = "#C7AE95",
+			info = "#95AEC7",
+			hint = "#95C7AE",
+			diff = {
+				add = "#DFEAE4",
+				change = "#E2E6EE",
+				delete = "#F0E4DF",
+				text = "#C7CCD1",
+			},
+			terminal = terminal,
+		}
+	else
+		local style = vim.o.background == "light" and "day" or "night"
+		colors = require("tokyonight.colors").setup({ style = style })
+	end
+	local terminal = colors.terminal
+
+	-- Keep the terminal transparent in Tokyo Night; Ashes uses its light canvas.
+	local background = is_ashes and colors.bg or "NONE"
+	set_hl("Normal", { bg = background, fg = colors.fg })
+	set_hl("NormalNC", { bg = background, fg = colors.fg })
+	set_hl("SignColumn", { bg = background })
+	set_hl("LineNr", { bg = background })
+	set_hl("Folded", { bg = is_ashes and colors.bg_dark or "NONE", fg = colors.comment })
+	set_hl("EndOfBuffer", { bg = background, fg = colors.bg_highlight })
 
 	-- Transparent tabline/bufferline
-	set_hl("TabLine", { bg = "NONE" })
-	set_hl("TabLineFill", { bg = "NONE" })
-	set_hl("TabLineSel", { bg = "NONE" })
+	set_hl("TabLine", { bg = is_ashes and colors.bg_dark or "NONE", fg = colors.comment })
+	set_hl("TabLineFill", { bg = is_ashes and colors.bg_dark or "NONE" })
+	set_hl("TabLineSel", { bg = colors.bg, fg = colors.fg, bold = true })
 
 	-- Enhanced cursor line
 	set_hl("CursorLineNr", { bold = true })
 
 	-- Better visual selection
-	set_hl("Visual", { bg = "#364a82", fg = "NONE" })
+	set_hl("Visual", { bg = colors.bg_visual, fg = colors.fg })
 
 	-- Improved search highlighting
-	set_hl("Search", { bg = "#ff9e64", fg = "#1a1b26", bold = true })
-	set_hl("IncSearch", { bg = "#f7768e", fg = "#1a1b26", bold = true })
+	set_hl("Search", { bg = colors.bg_search, fg = colors.bg, bold = true })
+	set_hl("IncSearch", { bg = colors.orange, fg = colors.bg, bold = true })
 
 	-- Float window borders
-	set_hl("FloatBorder", { fg = "#565f89", bg = "NONE" })
+	set_hl("FloatBorder", { fg = colors.border_highlight, bg = "NONE" })
 	set_hl("NormalFloat", { bg = "NONE" })
 
 	-- Diagnostic highlights
-	set_hl("DiagnosticError", { fg = "#f7768e" })
-	set_hl("DiagnosticWarn", { fg = "#e0af68" })
-	set_hl("DiagnosticInfo", { fg = "#7aa2f7" })
-	set_hl("DiagnosticHint", { fg = "#1abc9c" })
+	set_hl("DiagnosticError", { fg = colors.error })
+	set_hl("DiagnosticWarn", { fg = colors.warning })
+	set_hl("DiagnosticInfo", { fg = colors.info })
+	set_hl("DiagnosticHint", { fg = colors.hint })
 
 	-- Better diff colors
-	set_hl("DiffAdd", { bg = "#20303b", fg = "#449dab" })
-	set_hl("DiffChange", { bg = "#1f2335", fg = "#6183bb" })
-	set_hl("DiffDelete", { bg = "#37222c", fg = "#914c54" })
-	set_hl("DiffText", { bg = "#394b70", fg = "#394b70", bold = true })
+	set_hl("DiffAdd", { bg = colors.diff.add, fg = colors.green })
+	set_hl("DiffChange", { bg = colors.diff.change, fg = colors.blue })
+	set_hl("DiffDelete", { bg = colors.diff.delete, fg = colors.red })
+	set_hl("DiffText", { bg = colors.diff.text, fg = colors.fg, bold = true })
 
 	-- Terminal colors
-	vim.g.terminal_color_0 = "#15161e" -- black
-	vim.g.terminal_color_1 = "#f7768e" -- red
-	vim.g.terminal_color_2 = "#9ece6a" -- green
-	vim.g.terminal_color_3 = "#e0af68" -- yellow
-	vim.g.terminal_color_4 = "#7aa2f7" -- blue
-	vim.g.terminal_color_5 = "#bb9af7" -- magenta
-	vim.g.terminal_color_6 = "#7dcfff" -- cyan
-	vim.g.terminal_color_7 = "#a9b1d6" -- white
-	vim.g.terminal_color_8 = "#414868" -- bright black
-	vim.g.terminal_color_9 = "#f7768e" -- bright red
-	vim.g.terminal_color_10 = "#9ece6a" -- bright green
-	vim.g.terminal_color_11 = "#e0af68" -- bright yellow
-	vim.g.terminal_color_12 = "#7aa2f7" -- bright blue
-	vim.g.terminal_color_13 = "#bb9af7" -- bright magenta
-	vim.g.terminal_color_14 = "#7dcfff" -- bright cyan
-	vim.g.terminal_color_15 = "#c0caf5" -- bright white
+	vim.g.terminal_color_0 = terminal.black
+	vim.g.terminal_color_1 = terminal.red
+	vim.g.terminal_color_2 = terminal.green
+	vim.g.terminal_color_3 = terminal.yellow
+	vim.g.terminal_color_4 = terminal.blue
+	vim.g.terminal_color_5 = terminal.magenta
+	vim.g.terminal_color_6 = terminal.cyan
+	vim.g.terminal_color_7 = terminal.white
+	vim.g.terminal_color_8 = terminal.black_bright
+	vim.g.terminal_color_9 = terminal.red_bright
+	vim.g.terminal_color_10 = terminal.green_bright
+	vim.g.terminal_color_11 = terminal.yellow_bright
+	vim.g.terminal_color_12 = terminal.blue_bright
+	vim.g.terminal_color_13 = terminal.magenta_bright
+	vim.g.terminal_color_14 = terminal.cyan_bright
+	vim.g.terminal_color_15 = terminal.white_bright
 
 	-- Plugin-specific highlights
 	-- Notification backgrounds (nvim-notify)
@@ -81,15 +138,15 @@ local function apply_highlights()
 	end
 
 	-- LSP reference highlights
-	set_hl("LspReferenceText", { bg = "#3b4261", underline = false })
-	set_hl("LspReferenceRead", { bg = "#3b4261", underline = false })
-	set_hl("LspReferenceWrite", { bg = "#3b4261", underline = false, bold = true })
+	set_hl("LspReferenceText", { bg = colors.bg_highlight, underline = false })
+	set_hl("LspReferenceRead", { bg = colors.bg_highlight, underline = false })
+	set_hl("LspReferenceWrite", { bg = colors.bg_highlight, underline = false, bold = true })
 
 	-- Better completion menu
-	set_hl("Pmenu", { bg = "#1a1b26", fg = "#c0caf5" })
-	set_hl("PmenuSel", { bg = "#7aa2f7", fg = "#1a1b26", bold = true })
-	set_hl("PmenuSbar", { bg = "#16161e" })
-	set_hl("PmenuThumb", { bg = "#7aa2f7" })
+	set_hl("Pmenu", { bg = colors.bg_popup, fg = colors.fg })
+	set_hl("PmenuSel", { bg = colors.blue, fg = colors.bg, bold = true })
+	set_hl("PmenuSbar", { bg = colors.bg_dark })
+	set_hl("PmenuThumb", { bg = colors.blue })
 end
 
 -- Create autocommand to apply highlights

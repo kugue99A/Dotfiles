@@ -1,0 +1,318 @@
+diff --git a/internal/limits/codexlimits.go b/internal/limits/codexlimits.go
+index 2193905..d319ac4 100644
+--- a/internal/limits/codexlimits.go
++++ b/internal/limits/codexlimits.go
+@@ -220,6 +220,14 @@ func CollectCodexLimits(_ *string, nowMs int64) ProviderLimits {
+ // CollectCodexLimitsIn collects one Codex home's windows and stamps them with
+ // the given provider id/label so multi-profile rows stay independent.
+ func CollectCodexLimitsIn(home, providerID, label string, nowMs int64) ProviderLimits {
++	// The Codex rollout JSONL only contains a snapshot from the last turn. The
++	// app-server exposes the account's current quota even when rollout
++	// rate_limits has become null, so prefer it for the default Codex home.
++	if filepath.Clean(home) == filepath.Clean(codexHome()) {
++		if live, ok := collectCodexAppServerLimits(providerID, label, nowMs); ok {
++			return live
++		}
++	}
+ 	paths := ListNewestRolloutPathsIn(home, codexMaxRolloutsToScan)
+ 	// Newest-first: take the first rollout that carries a rate_limits snapshot.
+ 	// A just-opened session has session_meta but no token_count yet, so the
+@@ -244,8 +252,12 @@ func CollectCodexLimitsIn(home, providerID, label string, nowMs int64) ProviderL
+ 			FetchedAtMs: nowMs,
+ 		}
+ 		if age := minutesBetween(observedMs, nowMs); age > codexStaleAfterMinutes {
+-			note := "stale ~" + itoa(age) + "m ago"
++			note := "stale ~" + itoa(age) + "m ago; live Codex rate limits unavailable"
+ 			out.Note = &note
++			// Never present an old snapshot as a current quota. In particular, a
++			// stale zero-used snapshot would incorrectly render as 100% remaining.
++			out.Primary = nil
++			out.Secondary = nil
+ 		}
+ 		if borrowed := borrowCodexWindowsIn(home, providerID, label, nowMs); borrowed != nil && borrowed.FetchedAtMs > observedMs {
+ 			return *borrowed
+diff --git a/internal/limits/codexlimits_test.go b/internal/limits/codexlimits_test.go
+index 46a29f9..b2bb35c 100644
+--- a/internal/limits/codexlimits_test.go
++++ b/internal/limits/codexlimits_test.go
+@@ -296,7 +296,7 @@ func TestCollectCodexLimits_StaleRolloutIsLabeled(t *testing.T) {
+ 		mtime    time.Time
+ 		wantNote string // "" means the note must be absent
+ 	}{
+-		{"two-hour-old snapshot is labeled stale", base.Add(-2 * time.Hour), "stale ~120m ago"},
++		{"two-hour-old snapshot is labeled stale", base.Add(-2 * time.Hour), "stale ~120m ago; live Codex rate limits unavailable"},
+ 		{"snapshot from this turn is not labeled", base, ""},
+ 	}
+ 	for _, tc := range cases {
+@@ -307,15 +307,18 @@ func TestCollectCodexLimits_StaleRolloutIsLabeled(t *testing.T) {
+ 
+ 			got := CollectCodexLimits(nil, nowMs)
+ 
+-			if got.Primary == nil || got.Primary.UsedPercentage != 12 {
+-				t.Fatalf("primary = %+v, want the rollout snapshot regardless of age", got.Primary)
+-			}
+ 			if tc.wantNote == "" {
++				if got.Primary == nil || got.Primary.UsedPercentage != 12 {
++					t.Fatalf("primary = %+v, want the current rollout snapshot", got.Primary)
++				}
+ 				if got.Note != nil {
+ 					t.Fatalf("note = %q, want none for a current snapshot", *got.Note)
+ 				}
+ 				return
+ 			}
++			if got.Primary != nil || got.Secondary != nil {
++				t.Fatalf("stale windows = %+v / %+v, want them hidden", got.Primary, got.Secondary)
++			}
+ 			if got.Note == nil {
+ 				t.Fatalf("want note %q, got none", tc.wantNote)
+ 			}
+diff --git a/internal/limits/formatpanel.go b/internal/limits/formatpanel.go
+index 66b0eac..d010e22 100644
+--- a/internal/limits/formatpanel.go
++++ b/internal/limits/formatpanel.go
+@@ -82,7 +82,13 @@ func formatResetIn(ms int64) string {
+ }
+ 
+ func windowTag(w *LimitWindow, fallback string) string {
+-	if w == nil || w.WindowMinutes == nil {
++	if w == nil {
++		return fallback
++	}
++	if w.WindowLabel != "" {
++		return w.WindowLabel
++	}
++	if w.WindowMinutes == nil {
+ 		return fallback
+ 	}
+ 	return minutesTag(*w.WindowMinutes)
+diff --git a/internal/limitscore/types.go b/internal/limitscore/types.go
+index 88ef16a..5789776 100644
+--- a/internal/limitscore/types.go
++++ b/internal/limitscore/types.go
+@@ -27,6 +27,10 @@ type LimitWindow struct {
+ 	ResetsAt *int64 `json:"resetsAt,omitempty"`
+ 	// WindowMinutes hints the window length for display labels.
+ 	WindowMinutes *int `json:"windowMinutes,omitempty"`
++	// WindowLabel is an explicit display label for limits whose reset window
++	// duration is not exposed by the provider (for example Codex's account
++	// quota). It takes precedence over WindowMinutes.
++	WindowLabel string `json:"windowLabel,omitempty"`
+ 	// RunOut projection from the recent-pace history pass. Nil when there is
+ 	// not enough history, the pace is flat/negative, or it holds until reset.
+ 	RunOut *RunOutEstimate `json:"runOut,omitempty"`
+diff --git a/internal/limits/codexappserver.go b/internal/limits/codexappserver.go
+new file mode 100644
+index 0000000..224ad24
+--- /dev/null
++++ b/internal/limits/codexappserver.go
+@@ -0,0 +1,210 @@
++package limits
++
++import (
++	"bufio"
++	"context"
++	"encoding/json"
++	"fmt"
++	"io"
++	"os/exec"
++	"time"
++
++	"github.com/senna-lang/herdr-agent-usage/internal/planlabels"
++)
++
++const codexAppServerTimeout = 10 * time.Second
++
++// Codex 0.154+ exposes account/rateLimits/read through its local app-server.
++// Unlike rollout JSONL, this endpoint is backed by the current account state.
++type codexAppServerResponse struct {
++	ID     *int                  `json:"id"`
++	Result *codexAppServerResult `json:"result"`
++	Error  json.RawMessage       `json:"error"`
++}
++
++type codexAppServerResult struct {
++	RateLimits          *codexAppServerLimits            `json:"rateLimits"`
++	RateLimitsByLimitID map[string]*codexAppServerLimits `json:"rateLimitsByLimitId"`
++}
++
++type codexAppServerLimits struct {
++	Primary         *codexAppServerWindow          `json:"primary"`
++	Secondary       *codexAppServerWindow          `json:"secondary"`
++	IndividualLimit *codexAppServerIndividualLimit `json:"individualLimit"`
++	PlanType        *string                        `json:"planType"`
++}
++
++type codexAppServerWindow struct {
++	UsedPercent        *float64 `json:"usedPercent"`
++	WindowDurationMins *float64 `json:"windowDurationMins"`
++	ResetsAt           *float64 `json:"resetsAt"`
++}
++
++type codexAppServerIndividualLimit struct {
++	RemainingPercent *float64 `json:"remainingPercent"`
++	ResetsAt         *float64 `json:"resetsAt"`
++}
++
++func collectCodexAppServerLimits(providerID, label string, nowMs int64) (ProviderLimits, bool) {
++	limits, err := readCodexAppServerLimits()
++	if err != nil || limits == nil {
++		return ProviderLimits{}, false
++	}
++
++	out := ProviderLimits{
++		ProviderID:  providerID,
++		Label:       label,
++		PlanType:    planlabels.CodexPlanLabel(limits.PlanType),
++		Source:      "codex app-server",
++		FetchedAtMs: nowMs,
++	}
++	out.Primary = appServerWindow(limits.Primary)
++	out.Secondary = appServerWindow(limits.Secondary)
++	if out.Primary != nil || out.Secondary != nil {
++		return out, true
++	}
++
++	// Current Codex Business responses may omit primary/secondary while still
++	// exposing the live account quota. Keep that value, but label it as quota
++	// rather than guessing that it is a 5h or 7d window.
++	if individual := limits.IndividualLimit; individual != nil && individual.RemainingPercent != nil && isFiniteF(*individual.RemainingPercent) {
++		remaining := clampPercent(*individual.RemainingPercent)
++		window := &LimitWindow{
++			UsedPercentage: 100 - remaining,
++			WindowLabel:    "quota",
++		}
++		if individual.ResetsAt != nil && isFiniteF(*individual.ResetsAt) {
++			reset := int64(*individual.ResetsAt)
++			window.ResetsAt = &reset
++		}
++		out.Primary = window
++		return out, true
++	}
++	return ProviderLimits{}, false
++}
++
++func appServerWindow(raw *codexAppServerWindow) *LimitWindow {
++	if raw == nil || raw.UsedPercent == nil || !isFiniteF(*raw.UsedPercent) {
++		return nil
++	}
++	window := &LimitWindow{UsedPercentage: clampPercent(*raw.UsedPercent)}
++	if raw.WindowDurationMins != nil && isFiniteF(*raw.WindowDurationMins) {
++		minutes := int(*raw.WindowDurationMins)
++		window.WindowMinutes = &minutes
++	}
++	if raw.ResetsAt != nil && isFiniteF(*raw.ResetsAt) {
++		reset := int64(*raw.ResetsAt)
++		window.ResetsAt = &reset
++	}
++	return window
++}
++
++func clampPercent(value float64) float64 {
++	if value < 0 {
++		return 0
++	}
++	if value > 100 {
++		return 100
++	}
++	return value
++}
++
++func readCodexAppServerLimits() (*codexAppServerLimits, error) {
++	ctx, cancel := context.WithTimeout(context.Background(), codexAppServerTimeout)
++	defer cancel()
++
++	cmd, err := codexAppServerCommand(ctx)
++	if err != nil {
++		return nil, err
++	}
++	stdin, err := cmd.StdinPipe()
++	if err != nil {
++		return nil, err
++	}
++	stdout, err := cmd.StdoutPipe()
++	if err != nil {
++		return nil, err
++	}
++	cmd.Stderr = io.Discard
++	if err := cmd.Start(); err != nil {
++		return nil, err
++	}
++
++	send := func(message any) error {
++		encoded, err := json.Marshal(message)
++		if err != nil {
++			return err
++		}
++		_, err = fmt.Fprintf(stdin, "%s\n", encoded)
++		return err
++	}
++	if err := send(map[string]any{
++		"id":     1,
++		"method": "initialize",
++		"params": map[string]any{
++			"clientInfo": map[string]string{
++				"name":    "herdr-agent-usage",
++				"title":   "Herdr Agent Usage",
++				"version": "0.5",
++			},
++			"capabilities": map[string]any{
++				"experimentalApi":    true,
++				"requestAttestation": false,
++			},
++		},
++	}); err != nil {
++		_ = cmd.Process.Kill()
++		return nil, err
++	}
++
++	scanner := bufio.NewScanner(stdout)
++	scanner.Buffer(make([]byte, 4096), 1024*1024)
++	var result *codexAppServerLimits
++	for scanner.Scan() {
++		var response codexAppServerResponse
++		if err := json.Unmarshal(scanner.Bytes(), &response); err != nil || response.ID == nil {
++			continue
++		}
++		switch *response.ID {
++		case 1:
++			if err := send(map[string]any{"method": "initialized", "params": map[string]any{}}); err != nil {
++				_ = cmd.Process.Kill()
++				return nil, err
++			}
++			if err := send(map[string]any{
++				"id":     2,
++				"method": "account/rateLimits/read",
++				"params": map[string]any{"excludeResetCreditDetails": true},
++			}); err != nil {
++				_ = cmd.Process.Kill()
++				return nil, err
++			}
++		case 2:
++			if response.Result != nil {
++				result = response.Result.RateLimits
++				if result == nil {
++					result = response.Result.RateLimitsByLimitID["codex"]
++				}
++			}
++			_ = stdin.Close()
++			_ = cmd.Wait()
++			return result, nil
++		}
++	}
++	_ = stdin.Close()
++	_ = cmd.Wait()
++	if err := scanner.Err(); err != nil {
++		return nil, err
++	}
++	return result, nil
++}
++
++func codexAppServerCommand(ctx context.Context) (*exec.Cmd, error) {
++	if codex, err := exec.LookPath("codex"); err == nil {
++		return exec.CommandContext(ctx, codex, "app-server", "--stdio"), nil
++	}
++	if mise, err := exec.LookPath("mise"); err == nil {
++		return exec.CommandContext(ctx, mise, "exec", "--", "codex", "app-server", "--stdio"), nil
++	}
++	return nil, fmt.Errorf("codex and mise are not available on PATH")
++}

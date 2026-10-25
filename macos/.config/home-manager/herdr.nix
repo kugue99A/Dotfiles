@@ -6,9 +6,51 @@ in
 {
   home.file.".config/herdr/sounds/tirori-2loops.mp3".source = ./sounds/tirori-2loops.mp3;
 
+  # Claude Code exposes current subscription windows in its statusLine
+  # payload. Feed it into Agent Usage's Claude cache.
+  home.file.".local/bin/herdr-claude-statusline" = {
+    executable = true;
+    text = ''
+      #!/bin/sh
+      set -eu
+
+      statusline_tmp=$(mktemp "''${TMPDIR:-/tmp}/herdr-claude-statusline.XXXXXX") || exit 0
+      trap 'rm -f "$statusline_tmp"' EXIT
+      cat >"$statusline_tmp"
+
+      plugin_root=$(${pkgs.mise}/bin/mise exec -- herdr plugin list --json 2>/dev/null | ${pkgs.jq}/bin/jq -r '.result.plugins[]? | select(.plugin_id == "usagebar") | .plugin_root' | head -n 1)
+      if [ -n "$plugin_root" ] && [ -x "$plugin_root/bin/run-usagebar.sh" ]; then
+        "$plugin_root/bin/run-usagebar.sh" statusline <"$statusline_tmp" >/dev/null 2>&1 || true
+      fi
+    '';
+  };
+
   home.file.".config/herdr/config.toml".text = ''
     # Herdr keybindings aligned with the local tmux/Zellij-style layout.
     onboarding = false
+
+    [theme]
+    # Follow WezTerm's active ANSI palette (Tokyo Night or Ashes Light).
+    name = "terminal"
+
+    # Ashes-inspired light palette. Keep active tabs and active sidebar rows
+    # on the same lavender/dark-slate combination.
+    [theme.custom]
+    panel_bg = "#F4F2F4"
+    text = "#273139"
+    subtext0 = "#414D55"
+    overlay0 = "#536169"
+    overlay1 = "#414D55"
+    accent = "#D9C9DF"
+    active_row_bg = "#D9C9DF"
+    selection_bg = "#CDB8D5"
+    mauve = "#70586F"
+    green = "#456B57"
+    yellow = "#776A41"
+    red = "#965C58"
+    blue = "#586F91"
+    teal = "#4D7777"
+    peach = "#91664F"
 
     [terminal]
     default_shell = "${pkgs.fish}/bin/fish"
@@ -18,13 +60,24 @@ in
     [ui]
     sidebar_min_width = 36
     sidebar_max_width = 36
+    # Keep navigation/border accents distinct from the shared active fill.
+    accent = "#735C84"
+
+    [ui.sidebar.spaces]
+    rows = [
+      ["state_icon", { token = "workspace", fg = "#273139", bold = true, dim = false }],
+      [{ token = "branch", fg = "#46535B", dim = false }, "git_status"],
+    ]
 
     [ui.sidebar.agents]
     row_gap = 0
     rows = [
-      ["state_icon", "$title"],
-      ["$provider", "$limit"],
-      ["$context"],
+      ["state_icon", { token = "$title", fg = "#273139", bold = true, dim = false }],
+      [
+        { token = "$provider", fg = "#46535B", dim = false },
+        { token = "$limit", fg = "#46535B", dim = false },
+      ],
+      [{ token = "$context", fg = "#46535B", dim = false }],
     ]
 
     [ui.toast]
@@ -125,6 +178,49 @@ in
       fi
     else
       echo "warning: Herdr is not installed; run 'mise install' to enable Agent Usage" >&2
+    fi
+  '';
+
+  # The upstream plugin's rollout reader can only see old Codex snapshots.
+  # Apply the live app-server reader and rebuild the plugin after installation
+  # so the fix survives plugin upgrades and Home Manager re-activation.
+  home.activation.herdrAgentUsageCodexFix = lib.hm.dag.entryAfter [ "herdrAgentUsagePlugin" ] ''
+    herdr() {
+      ${pkgs.mise}/bin/mise exec -- herdr "$@"
+    }
+
+    if herdr --version >/dev/null 2>&1; then
+      plugin_root=$(herdr plugin list --json | ${pkgs.jq}/bin/jq -r '.result.plugins[]? | select(.plugin_id == "usagebar") | .plugin_root' | head -n 1)
+      if [ -n "$plugin_root" ] && [ -f "$plugin_root/go.mod" ]; then
+        if [ ! -f "$plugin_root/internal/limits/codexappserver.go" ]; then
+          ${pkgs.git}/bin/git -C "$plugin_root" apply ${./herdr-agent-usage-codex.patch}
+        fi
+        if [ -f "$plugin_root/internal/limits/codexappserver.go" ]; then
+          if ! grep -q "live Claude statusLine unavailable" "$plugin_root/internal/limits/claudecache.go"; then
+            ${pkgs.git}/bin/git -C "$plugin_root" apply ${./herdr-agent-usage-claude.patch}
+          fi
+          (cd "$plugin_root" && ${pkgs.mise}/bin/mise exec -- go build -o bin/usagebar ./cmd/usagebar)
+          herdr server reload-config >/dev/null 2>&1 || true
+          "$plugin_root/bin/usagebar" startup >/dev/null 2>&1 || true
+        fi
+      fi
+    fi
+  '';
+
+  home.activation.herdrClaudeStatusline = lib.hm.dag.entryAfter [ "herdrAgentUsageCodexFix" ] ''
+    claude_settings="$HOME/.claude/settings.json"
+    claude_wrapper="$HOME/.local/bin/herdr-claude-statusline"
+    if [ -f "$claude_settings" ] && [ -x "$claude_wrapper" ]; then
+      current_statusline=$(${pkgs.jq}/bin/jq -r '.statusLine.command // empty' "$claude_settings" 2>/dev/null || true)
+      if [ -z "$current_statusline" ]; then
+        claude_tmp=$(mktemp "$HOME/.claude/settings.json.herdr.XXXXXX")
+        if ${pkgs.jq}/bin/jq --arg command "$claude_wrapper" '.statusLine = {type: "command", command: $command}' "$claude_settings" >"$claude_tmp"; then
+          chmod --reference="$claude_settings" "$claude_tmp" 2>/dev/null || true
+          mv "$claude_tmp" "$claude_settings"
+        else
+          rm -f "$claude_tmp"
+        fi
+      fi
     fi
   '';
 }

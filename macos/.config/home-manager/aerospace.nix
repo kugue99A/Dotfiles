@@ -26,11 +26,8 @@
     after-login-command = []
     after-startup-command = []
 
-    # ワークスペース変更時にSketchyBarへ通知
-    exec-on-workspace-change = [
-        '/bin/bash', '-c',
-        '${pkgs.sketchybar}/bin/sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE AEROSPACE_PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE',
-    ]
+    # The persistent SketchyBar worker subscribes to AeroSpace socket events.
+    exec-on-workspace-change = []
 
     # ウィンドウ間のギャップ
     # Studio Display: SketchyBar(32) + gap(4) = 36 (SketchyBarはメインディスプレイのみ表示)
@@ -42,11 +39,6 @@
     outer.bottom = 30 
     outer.right = 30
     outer.top = [{monitor."Built-in Retina Display" = 20}, 60]
-
-    # ウィンドウ検出時にSketchyBarのワークスペースアイコンを更新
-    [[on-window-detected]]
-    check-further-callbacks = true
-    run = ['exec-and-forget /bin/bash -c "${pkgs.sketchybar}/bin/sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$(${pkgs.aerospace}/bin/aerospace list-workspaces --focused)"']
 
     # AeroSpaceが検出した全ウィンドウをタイル管理対象にする。
     # app-name-regex-substring は空でないアプリ名に対して常にマッチする。

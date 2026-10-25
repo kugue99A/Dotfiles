@@ -1,5 +1,8 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
+let
+  statusPython = pkgs.python3.withPackages (p: [ p.psutil ]);
+in
 {
   # === ヘルパースクリプト ===
 
@@ -9,78 +12,23 @@
     executable = true;
   };
 
-  # 2. ワークスペースアイコン更新スクリプト
-  home.file.".config/sketchybar/helpers/workspace_icons.sh" = {
-    executable = true;
-    text = ''
-      #!/bin/bash
-      # 使い方: workspace_icons.sh <workspace_id>
-      WORKSPACE="$1"
-      [ -z "$WORKSPACE" ] && exit 1
-
-      source "$HOME/.config/sketchybar/helpers/icon_map.sh"
-
-      APPS="$(${pkgs.aerospace}/bin/aerospace list-windows --workspace "$WORKSPACE" --format '%{app-name}' 2>/dev/null)"
-
-      ICON_STRIP=""
-      if [ -n "$APPS" ]; then
-        while IFS= read -r APP; do
-          __icon_map "$APP"
-          ICON_STRIP+=" $icon_result"
-        done <<< "$APPS"
-      fi
-
-      if [ -n "$ICON_STRIP" ]; then
-        sketchybar --set "space.$WORKSPACE" label="$ICON_STRIP" label.drawing=on
-      else
-        sketchybar --set "space.$WORKSPACE" label.drawing=off
-      fi
-    '';
-  };
-
-  # 3. ワークスペーススクリプト (フォーカス判定 + アイコン更新)
-  home.file.".config/sketchybar/helpers/space_script.sh" = {
-    executable = true;
-    text = ''
-      #!/bin/bash
-      # 使い方: space_script.sh <workspace_id> <ws_color> <highlight_color>
-      WS="$1"; COLOR="$2"; HIGHLIGHT="$3"
-
-      # フォーカス状態 + ディスプレイ割り当ての更新 (イベント時 or 初期化時のみ)
-      # routine (update_freq) 時は AEROSPACE_FOCUSED_WORKSPACE が空なのでスキップ
-      if [ "$SENDER" = "aerospace_workspace_change" ] || [ "$SENDER" = "forced" ]; then
-        # このワークスペースが所属するモニターを特定し、対応ディスプレイに表示
-        DISPLAY_ID=""
-        for mid in $(${pkgs.aerospace}/bin/aerospace list-monitors | awk -F'|' '{gsub(/ /,"",$1); print $1}'); do
-          if ${pkgs.aerospace}/bin/aerospace list-workspaces --monitor "$mid" | grep -qw "$WS"; then
-            DISPLAY_ID="$mid"
-            break
-          fi
-        done
-        if [ -n "$DISPLAY_ID" ]; then
-          sketchybar --set "$NAME" display="$DISPLAY_ID"
-        fi
-
-        if [ "$SENDER" = "forced" ]; then
-          # 初期化時は aerospace に直接問い合わせ
-          FOCUSED_WS=$(${pkgs.aerospace}/bin/aerospace list-workspaces --focused)
-        else
-          FOCUSED_WS="$AEROSPACE_FOCUSED_WORKSPACE"
-        fi
-
-        if [ "$FOCUSED_WS" = "$WS" ]; then
-          sketchybar --set "$NAME" background.drawing=on background.color="$COLOR" \
-            background.corner_radius=6 background.height=26 \
-            icon.color="$HIGHLIGHT" label.color="$HIGHLIGHT"
-        else
-          sketchybar --set "$NAME" background.drawing=off \
-            icon.color="$COLOR" label.color="$COLOR"
-        fi
-      fi
-
-      # アイコン更新 (常に実行 - イベント時も routine 時も)
-      "$HOME/.config/sketchybar/helpers/workspace_icons.sh" "$WS"
-    '';
+  # One persistent worker consumes AeroSpace socket events and batches updates.
+  home.file.".config/sketchybar/helpers/status_daemon.py".source = ./sketchybar/status_daemon.py;
+  home.file."Library/Logs/sketchybar/.keep".text = "";
+  launchd.agents.sketchybar-status = {
+    enable = true;
+    config = {
+      ProgramArguments = [ "${statusPython}/bin/python3" "-u" "${./sketchybar/status_daemon.py}" ];
+      EnvironmentVariables = {
+        USER = config.home.username;
+        SKETCHYBAR_BINARY = "${pkgs.sketchybar}/bin/sketchybar";
+      };
+      RunAtLoad = true;
+      KeepAlive = true;
+      ThrottleInterval = 10;
+      StandardOutPath = "${config.home.homeDirectory}/Library/Logs/sketchybar/status.out.log";
+      StandardErrorPath = "${config.home.homeDirectory}/Library/Logs/sketchybar/status.err.log";
+    };
   };
 
   # 5. フロントアプリアイコン更新スクリプト
@@ -94,44 +42,54 @@
     '';
   };
 
-  # 6. CPU更新スクリプト
-  home.file.".config/sketchybar/helpers/cpu_update.sh" = {
-    executable = true;
-    text = ''
-      #!/bin/bash
-      NCPU=$(sysctl -n hw.ncpu)
-      CPU_PCT=$(ps -A -o %cpu= | awk -v n="$NCPU" '{s+=$1} END {printf "%.0f", s/n}')
-      CPU_NORM=$(awk "BEGIN {printf \"%.2f\", $CPU_PCT/100}")
-      sketchybar --push cpu "$CPU_NORM"
-      sketchybar --set cpu label="''${CPU_PCT}%"
-    '';
-  };
-
   # === SketchyBar 本体設定 ===
   programs.sketchybar = {
     enable = true;
     configType = "bash";
     extraPackages = with pkgs; [ jq ];
     config = ''
-      # === Iceberg Dark カラー定義 ===
+      THEME_FILE="''${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/theme"
+      THEME_MODE=dark
+      if [[ -r "$THEME_FILE" ]]; then
+        IFS= read -r THEME_MODE < "$THEME_FILE"
+      fi
+
       TRANSPARENT=0x00000000
-      BG=0xff161821
-      TEXT=0xffc6c8d1
-      INACTIVE=0xff6b7089
-      HIGHLIGHT=0xffd2d4de
+      if [[ "$THEME_MODE" == light ]]; then
+        # Ashes Light: subdued colors tuned for the bright translucent desktop.
+        BG=0xfff5f4f4
+        TEXT=0xff555b60
+        INACTIVE=0xff92999d
+        HIGHLIGHT=0xfffaf8f7
+        ACTIVE_SPACE=0xff8d769d
+        CLR_RED=0xffad6e78
+        CLR_ORANGE=0xffaa805f
+        CLR_YELLOW=0xff8e8355
+        CLR_GREEN=0xff52735f
+        CLR_AQUA=0xff648b8e
+        CLR_BLUE=0xff637c8d
+        CLR_PURPLE=0xff856d94
+        CLR_BLUE_BR=0xff718ba3
+        CLR_PURPLE_BR=0xff987fa1
+      else
+        # Existing Iceberg Dark palette.
+        BG=0xff161821
+        TEXT=0xffc6c8d1
+        INACTIVE=0xff6b7089
+        HIGHLIGHT=0xffd2d4de
+        ACTIVE_SPACE=0xffa093c7
+        CLR_RED=0xffe27878
+        CLR_ORANGE=0xffe2a478
+        CLR_YELLOW=0xffe9b189
+        CLR_GREEN=0xffb4be82
+        CLR_AQUA=0xff89b8c2
+        CLR_BLUE=0xff84a0c6
+        CLR_PURPLE=0xffa093c7
+        CLR_BLUE_BR=0xff91acd1
+        CLR_PURPLE_BR=0xffada0d3
+      fi
 
-      # ウィジェットごとのテーマカラー (Iceberg palette)
-      CLR_RED=0xffe27878
-      CLR_ORANGE=0xffe2a478
-      CLR_YELLOW=0xffe9b189
-      CLR_GREEN=0xffb4be82
-      CLR_AQUA=0xff89b8c2
-      CLR_BLUE=0xff84a0c6
-      CLR_PURPLE=0xffa093c7
-      CLR_BLUE_BR=0xff91acd1
-      CLR_PURPLE_BR=0xffada0d3
-
-      # ワークスペースカラーマップ
+      # Workspace colors; the focused workspace uses a consistent Ashes accent.
       CMAP=($CLR_RED $CLR_ORANGE $CLR_YELLOW $CLR_GREEN $CLR_AQUA $CLR_BLUE $CLR_PURPLE $CLR_BLUE_BR $CLR_PURPLE_BR)
 
       # === バー全体 (完全透過 + ブラー) ===
@@ -165,11 +123,12 @@
       # ============================================================
       #  LEFT: ワークスペース
       # ============================================================
-      # カスタムイベントを宣言 (AeroSpace の exec-on-workspace-change から trigger される)
-      sketchybar --add event aerospace_workspace_change
-
-      for i in $(seq 1 9); do
+      for i in {1..9}; do
         COLOR=''${CMAP[$((i-1))]}
+        SPACE_BG=$COLOR
+        if [[ "$THEME_MODE" == light ]]; then
+          SPACE_BG=$ACTIVE_SPACE
+        fi
         sketchybar --add item space.$i left \
                    --set space.$i \
                      icon="$i" \
@@ -181,9 +140,8 @@
                      label.color=$COLOR \
                      label.drawing=off \
                      background.drawing=off \
-                     update_freq=5 \
-                     script="$HOME/.config/sketchybar/helpers/space_script.sh $i $COLOR $HIGHLIGHT" \
-                   --subscribe space.$i aerospace_workspace_change
+                     background.color=$SPACE_BG \
+                     update_freq=0
       done
 
       # ============================================================
@@ -211,16 +169,14 @@
                    icon=󰥔 \
                    icon.color=$CLR_BLUE \
                    label.color=$CLR_BLUE \
-                   update_freq=30 \
-                   script='sketchybar --set $NAME label="$(date "+%H:%M")"'
+                   update_freq=0
 
       sketchybar --add item cal.date right \
                  --set cal.date \
                    icon.drawing=off \
                    label.padding_left=8 \
                    label.color=$CLR_BLUE \
-                   update_freq=60 \
-                   script='sketchybar --set $NAME label="$(date "+%m/%d %a")"'
+                   update_freq=0
 
       sketchybar --add bracket bracket.cal cal.time cal.date \
                  --set bracket.cal \
@@ -237,25 +193,7 @@
                  --set battery \
                    icon.color=$CLR_ORANGE \
                    label.color=$CLR_ORANGE \
-                   update_freq=120 \
-                   script='
-                     PERCENTAGE="$(pmset -g batt | grep -Eo "[0-9]+%" | head -1 | tr -d "%")"
-                     CHARGING="$(pmset -g batt | grep -c "AC Power")"
-                     if [ "$CHARGING" -gt 0 ]; then
-                       ICON="󰂄"
-                     elif [ "$PERCENTAGE" -le 10 ]; then
-                       ICON="󰁺"
-                     elif [ "$PERCENTAGE" -le 25 ]; then
-                       ICON="󰁻"
-                     elif [ "$PERCENTAGE" -le 50 ]; then
-                       ICON="󰁾"
-                     elif [ "$PERCENTAGE" -le 75 ]; then
-                       ICON="󰂁"
-                     else
-                       ICON="󰁹"
-                     fi
-                     sketchybar --set $NAME icon="$ICON" label="''${PERCENTAGE}%"
-                   '
+                   update_freq=0
 
       sketchybar --add bracket bracket.battery battery \
                  --set bracket.battery \
@@ -273,9 +211,9 @@
                    icon.color=$CLR_GREEN \
                    label.color=$CLR_GREEN \
                    script='
-                     VOLUME="$(osascript -e "output volume of (get volume settings)" 2>/dev/null || echo 0)"
-                     MUTED="$(osascript -e "output muted of (get volume settings)" 2>/dev/null || echo false)"
-                     if [ "$MUTED" = "true" ]; then
+                     VOLUME="''${INFO%.*}"
+                     case "$VOLUME" in ""|*[!0-9]*) exit 0 ;; esac
+                     if [ "$VOLUME" -eq 0 ]; then
                        ICON="󰖁"
                      elif [ "$VOLUME" -le 30 ]; then
                        ICON="󰕿"
@@ -305,21 +243,7 @@
                  --set network \
                    icon.color=$CLR_PURPLE \
                    label.color=$CLR_PURPLE \
-                   update_freq=5 \
-                   script='
-                     IP_WIFI=$(ipconfig getifaddr en0 2>/dev/null)
-                     if [ -n "$IP_WIFI" ]; then
-                       sketchybar --set $NAME icon="󰖩" label="$IP_WIFI"
-                     else
-                       DEF_IF=$(route get default 2>/dev/null | awk "/interface:/ {print \$2}")
-                       IP=$(ipconfig getifaddr "$DEF_IF" 2>/dev/null)
-                       if [ -n "$IP" ]; then
-                         sketchybar --set $NAME icon="󰈀" label="$IP"
-                       else
-                         sketchybar --set $NAME icon="󰖪" label="未接続"
-                       fi
-                     fi
-                   '
+                   update_freq=0
 
       sketchybar --add bracket bracket.network network \
                  --set bracket.network \
@@ -337,17 +261,7 @@
                    icon=󰍛 \
                    icon.color=$CLR_RED \
                    label.color=$CLR_RED \
-                   update_freq=10 \
-                   script='
-                     MEM_TOTAL=$(sysctl -n hw.memsize)
-                     PAGESIZE=$(pagesize)
-                     ACTIVE=$(vm_stat | awk "/Pages active/ {print \$NF}" | tr -d ".")
-                     WIRED=$(vm_stat | awk "/Pages wired/ {print \$NF}" | tr -d ".")
-                     COMP=$(vm_stat | awk "/occupied by compressor/ {print \$NF}" | tr -d ".")
-                     MEM_USED=$(( (ACTIVE + WIRED + COMP) * PAGESIZE ))
-                     MEM_PCT=$(( MEM_USED * 100 / MEM_TOTAL ))
-                     sketchybar --set $NAME label="''${MEM_PCT}%"
-                   '
+                   update_freq=0
 
       sketchybar --add bracket bracket.mem mem \
                  --set bracket.mem \
@@ -373,8 +287,7 @@
                    label.y_offset=-4 \
                    icon.y_offset=-4 \
                    y_offset=4 \
-                   update_freq=2 \
-                   script='$HOME/.config/sketchybar/helpers/cpu_update.sh'
+                   update_freq=0
 
       sketchybar --add bracket bracket.cpu cpu \
                  --set bracket.cpu \

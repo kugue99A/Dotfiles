@@ -1,13 +1,19 @@
 gui:
+  colorScheme: light
   theme:
-    lightTheme: false
     activeBorderColor:
-      - '#d79921'
+      - '#637c8d'
       - bold
     inactiveBorderColor:
-      - '#a89984'
+      - '#8a9296'
     selectedLineBgColor:
-      - '#3c3836'
+      - '#e8e4eb'
+    selectedLineFgColor:
+      - '#39434a'
+    defaultFgColor:
+      - '#39434a'
+    unstagedChangesColor:
+      - '#52735f'
 git:
   diffRenderers:
     - colorArg: always

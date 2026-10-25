@@ -18,6 +18,11 @@ let
   skills = {
     grilling = "skills/productivity/grilling";
     grill-me = "skills/productivity/grill-me";
+    # grill-with-docs もユーザー呼び出し専用 (/grill-with-docs, $grill-with-docs) で、
+    # grilling と domain-modeling の 2 つを呼ぶ薄いラッパー。domain-modeling が無いと
+    # CONTEXT.md / ADR が書かれないので必ずセットで入れる。
+    grill-with-docs = "skills/engineering/grill-with-docs";
+    domain-modeling = "skills/engineering/domain-modeling";
   };
 
   # 各エージェントがユーザースコープのスキルを探すディレクトリ。
