@@ -187,6 +187,24 @@
 
         if command -q herdr
             herdr server reload-config >/dev/null 2>&1
+
+            # Herdr's terminal theme re-reads the host ANSI palette after
+            # SIGWINCH. Signal the Herdr client that owns this shell so it
+            # picks up WezTerm's newly selected palette without changing the
+            # shared terminal background.
+            set -l client_pid $fish_pid
+            while test "$client_pid" -gt 1
+                set -l process_name (ps -o comm= -p $client_pid 2>/dev/null | string trim)
+                if test "$process_name" = herdr
+                    sleep 0.2
+                    kill -WINCH $client_pid 2>/dev/null
+                    break
+                end
+                set client_pid (ps -o ppid= -p $client_pid 2>/dev/null | string trim)
+                if test -z "$client_pid"
+                    break
+                end
+            end
         end
         if command -q sketchybar
             sketchybar --reload >/dev/null 2>&1

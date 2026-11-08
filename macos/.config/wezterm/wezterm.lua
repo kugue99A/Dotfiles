@@ -65,7 +65,15 @@ for index, value in ipairs(ashes_light_scheme.brights or {}) do
 	ashes_brights[index] = value
 end
 ashes_ansi[3] = "#52735F"
+-- Herdr's terminal theme uses ANSI Gray for secondary labels and DarkGray
+-- (bright black) for active rows. Ashes Light's defaults are too pale for the
+-- translucent desktop, so use readable slate text and a soft lavender row.
+ashes_ansi[8] = "#586169"
 ashes_brights[3] = "#6C8D77"
+ashes_brights[1] = "#D9C9DF"
+-- Herdr uses BrightWhite for unselected workspace labels; the light palette's
+-- pastel white disappears against the translucent desktop.
+ashes_brights[8] = "#586169"
 ashes_light_scheme.ansi = ashes_ansi
 ashes_light_scheme.brights = ashes_brights
 -- Use a muted Ashes blue-gray for normal and IME-composition cursors.

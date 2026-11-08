@@ -47,9 +47,12 @@ The block cursor has independent `cursor_bg`, `cursor_fg`, and
 can use `compose_cursor` instead. Both are explicitly set to a muted Ashes
 blue-gray in light mode so the cursor does not inherit vivid green.
 
-The overrides live in `wezterm.lua` under `ashes_light_scheme.indexed`. The
-window background remains `Tokyo Night`'s configured background in light mode;
-opacity and blur are separate WezTerm settings.
+The Codex overrides live in `wezterm.lua` under `ashes_light_scheme.indexed`.
+The Herdr contrast overrides use Ashes Light's ANSI white and bright-white
+slots for dark secondary text and workspace labels, plus bright-black for a
+lavender active-row fill. All are scoped to the light scheme. The window
+background remains `Tokyo Night`'s configured background in light mode; opacity
+and blur are separate WezTerm settings.
 
 The installed Codex theme file provides syntax colors and a muted `codex.accent`
 scope. `~/.codex/config.toml` selects it with `theme = "ashes-light"`. A theme
@@ -67,17 +70,17 @@ overriding the terminal cursor color.
 
 ## Herdr active and inactive rows
 
-Herdr 0.9.5 uses `theme.custom.accent` for the active tab fill and
-`theme.custom.active_row_bg` for active Space and focused Agent rows. The tab
-foreground is derived from `panel_bg` (or `surface_dim` when the panel
-background is reset), while row labels use palette text and per-token styles.
-This version does not expose independent active-tab foreground/background
-tokens, so use a light active fill with dark text for a consistent combination.
+Herdr uses `name = "terminal"` so its UI follows the active terminal ANSI
+palette. Avoid fixed `theme.custom` colors and explicit sidebar foregrounds in
+the shared config: they override both Tokyo Night and Ashes Light and can make
+one mode unreadable. Herdr 0.9.5 also supports separate `theme.custom.light` and
+`theme.custom.dark` overrides when `auto_switch` is enabled. This setup keeps the
+terminal background dark in both modes, so it uses the live ANSI palette instead
+of relying on appearance detection for those overrides. The `theme` Fish command
+reloads Herdr's config and sends `SIGWINCH` to the Herdr client owning the shell,
+which makes it re-read WezTerm's updated ANSI palette after changing the shared
+mode state.
 
-Inactive branch, provider, quota, and context fields should not rely on the
-terminal theme's default overlay colors or dim modifier. Define `overlay0`,
-`overlay1`, and `subtext0`, then use inline token styles with `dim = false` for
-the fields whose dim rendering has poor contrast on a translucent desktop.
 Herdr supports config validation with `herdr config check` and live server
 reloading with `herdr server reload-config`.
 

@@ -33,25 +33,6 @@ in
     # Follow WezTerm's active ANSI palette (Tokyo Night or Ashes Light).
     name = "terminal"
 
-    # Ashes-inspired light palette. Keep active tabs and active sidebar rows
-    # on the same lavender/dark-slate combination.
-    [theme.custom]
-    panel_bg = "#F4F2F4"
-    text = "#273139"
-    subtext0 = "#414D55"
-    overlay0 = "#536169"
-    overlay1 = "#414D55"
-    accent = "#D9C9DF"
-    active_row_bg = "#D9C9DF"
-    selection_bg = "#CDB8D5"
-    mauve = "#70586F"
-    green = "#456B57"
-    yellow = "#776A41"
-    red = "#965C58"
-    blue = "#586F91"
-    teal = "#4D7777"
-    peach = "#91664F"
-
     [terminal]
     default_shell = "${pkgs.fish}/bin/fish"
     shell_mode = "auto"
@@ -60,25 +41,9 @@ in
     [ui]
     sidebar_min_width = 36
     sidebar_max_width = 36
-    # Keep navigation/border accents distinct from the shared active fill.
-    accent = "#735C84"
-
-    [ui.sidebar.spaces]
-    rows = [
-      ["state_icon", { token = "workspace", fg = "#273139", bold = true, dim = false }],
-      [{ token = "branch", fg = "#46535B", dim = false }, "git_status"],
-    ]
 
     [ui.sidebar.agents]
     row_gap = 0
-    rows = [
-      ["state_icon", { token = "$title", fg = "#273139", bold = true, dim = false }],
-      [
-        { token = "$provider", fg = "#46535B", dim = false },
-        { token = "$limit", fg = "#46535B", dim = false },
-      ],
-      [{ token = "$context", fg = "#46535B", dim = false }],
-    ]
 
     [ui.toast]
     delivery = "system"
