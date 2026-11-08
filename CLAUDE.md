@@ -109,7 +109,8 @@ macos/.config/          # Source configurations
 │   ├── terminal.nix    # Terminal emulator settings
 │   ├── aerospace.nix   # Window manager configuration
 │   ├── sketchybar.nix  # Status bar configuration
-│   └── agent-skills.nix # Claude Code / Codex 共通のグローバル Agent Skills (mattpocock/skills)
+│   ├── agent-skills.nix # Claude Code / Codex 共通のグローバル Agent Skills (mattpocock/skills)
+│   └── agent-instructions.nix # Claude Code / Codex 共通のグローバル指示 (agent-instructions/GLOBAL.md)
 ├── mise/               # Runtime version management
 └── raycast/            # Raycast extensions (built, not source)
 ```
@@ -289,6 +290,13 @@ To modify Fish functions, edit `shell.nix` and run `home-manager switch`.
 - Check if running: `pgrep -f sketchybar`
 - Restart: `killall sketchybar && sketchybar`
 - Configuration: Managed by Nix at `sketchybar.nix`
+
+## グローバルなエージェント指示（関数型プログラミング / 関数型ドメインモデリング）
+
+`macos/.config/home-manager/agent-instructions/GLOBAL.md` を、`agent-instructions.nix` が `~/.claude/CLAUDE.md`（Claude Code）と `~/.codex/AGENTS.md`（Codex）の両方へ symlink する。関数型プログラミングと関数型ドメインモデリングを柱とする、全リポジトリ共通の設計原則と、モバイル UI の原則を書いている。
+
+- 編集は `GLOBAL.md` に対して行い、`home-manager switch` で反映する（配置先は Nix store への symlink なので、直接編集できない）
+- 参照している書籍 PDF は `~/.local/share/references/functional-domain-modeling.pdf` に置く。著作物で、このリポジトリは公開されているため、**コミットしない**。新しいマシンでは手動で配置する
 
 ## Claude Code スキル
 

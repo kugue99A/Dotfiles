@@ -16,6 +16,7 @@ in
     ./herdr.nix
     ./local-llm.nix
     ./agent-skills.nix
+    ./agent-instructions.nix
   ];
 
   home.username = local.username;
