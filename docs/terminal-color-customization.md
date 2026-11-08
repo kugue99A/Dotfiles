@@ -1,6 +1,6 @@
 # Terminal and CLI color customization
 
-Last updated: 2026-10-24
+Last updated: 2026-10-26
 
 This note records which layer owns each color and what can be changed in this
 repository. It is intended to prevent terminal palette changes from being
@@ -125,6 +125,17 @@ main bar config reads that state on `sketchybar --reload`; the status daemon
 reads it on its five-second refresh and colors the focused workspace with one
 consistent muted lavender fill. The Fish `theme` command reloads SketchyBar
 after changing the shared state.
+
+Workspace background color, height, and corner radius are static item settings.
+The status daemon updates app labels and foreground colors during its regular
+refresh. It sends background drawing changes only for workspace focus states
+that changed, with the new focused workspace enabled before the previous one is
+disabled. Reapplying background dimensions and colors on every refresh can
+briefly turn each workspace background on in sequence. Display assignment is
+sent only when it changes, before focus-state changes. Inactive app icons use
+the Ashes foreground text color so they remain visible over the desktop. After
+changing the daemon source, run Home Manager switch to restart the managed
+SketchyBar status agent.
 
 References:
 

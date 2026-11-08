@@ -24,6 +24,8 @@ import psutil
 
 
 MAX_FRAME = 16 * 1024 * 1024
+WORKSPACE_DISPLAYS: dict[str, str] = {}
+WORKSPACE_FOCUS: dict[str, bool] = {}
 THEME_COLORS = {
     "dark": {
         "workspaces": (
@@ -32,6 +34,7 @@ THEME_COLORS = {
         ),
         "active": None,
         "highlight": "0xffd2d4de",
+        "text": "0xffc6c8d1",
     },
     "light": {
         "workspaces": (
@@ -40,6 +43,7 @@ THEME_COLORS = {
         ),
         "active": "0xff8d769d",
         "highlight": "0xfffaf8f7",
+        "text": "0xff555b60",
     },
 }
 
@@ -119,13 +123,15 @@ class IconMap:
 
 def workspace_commands(workspaces: str, windows: str, icons: IconMap) -> list[str]:
     palette = theme_colors()
-    colors = palette["workspaces"]
     apps: dict[str, list[str]] = {}
     for line in windows.splitlines():
         workspace, separator, app = line.partition("\x1f")
         if separator:
             apps.setdefault(workspace, []).append(icons.get(app))
-    commands = []
+    display_commands = []
+    item_commands = []
+    focus_on_commands = []
+    focus_off_commands = []
     for line in workspaces.splitlines():
         fields = line.split("\x1f")
         if len(fields) != 3 or fields[0] not in {str(i) for i in range(1, 10)}:
@@ -133,18 +139,23 @@ def workspace_commands(workspaces: str, windows: str, icons: IconMap) -> list[st
         workspace, focused, display = fields
         if not display.isdigit() or int(display) < 1:
             continue
-        color = colors[int(workspace) - 1]
         selected = focused == "true"
-        background = (palette["active"] or color) if selected else color
-        foreground = palette["highlight"] if selected else color
-        commands += ["--set", "space." + workspace, "display=" + display,
-                     "background.drawing=" + ("on" if selected else "off"),
-                     "background.color=" + background, "background.corner_radius=6",
-                     "background.height=26", "icon.color=" + foreground,
-                     "label.color=" + foreground]
+        foreground = palette["highlight"] if selected else palette["text"]
+        item = "space." + workspace
+        if WORKSPACE_DISPLAYS.get(workspace) != display:
+            # Display assignment can re-enable drawing, so apply all display
+            # changes before the final focused/unfocused state commands.
+            display_commands += ["--set", item, "display=" + display]
+            WORKSPACE_DISPLAYS[workspace] = display
+        item_commands += ["--set", item, "icon.color=" + foreground,
+                          "label.color=" + foreground]
         strip = " ".join(apps.get(workspace, []))
-        commands += ["label=" + strip, "label.drawing=" + ("on" if strip else "off")]
-    return commands
+        item_commands += ["label=" + strip, "label.drawing=" + ("on" if strip else "off")]
+        if WORKSPACE_FOCUS.get(workspace) != selected:
+            target = focus_on_commands if selected else focus_off_commands
+            target += ["--set", item, "background.drawing=" + ("on" if selected else "off")]
+            WORKSPACE_FOCUS[workspace] = selected
+    return display_commands + item_commands + focus_on_commands + focus_off_commands
 
 
 class Audio:
@@ -225,10 +236,10 @@ def metric_commands(audio: Audio) -> list[str]:
 
 def send_bar(binary: str, args: list[str], timeout: float = 3):
     process = subprocess.Popen([binary, *args], stdin=subprocess.DEVNULL,
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                               start_new_session=True)
+                               stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                               text=True, start_new_session=True)
     try:
-        status = process.wait(timeout=timeout)
+        _, error = process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
         try:
             os.killpg(process.pid, signal.SIGKILL)
@@ -236,8 +247,10 @@ def send_bar(binary: str, args: list[str], timeout: float = 3):
             pass
         process.wait()
         raise TimeoutError("SketchyBar update exceeded 3 seconds")
-    if status:
-        raise RuntimeError(f"SketchyBar update exited {status}")
+    if process.returncode:
+        detail = error.strip()
+        raise RuntimeError(f"SketchyBar update exited {process.returncode}"
+                           + (f": {detail}" if detail else ""))
 
 
 def subscribe(changed: threading.Event, stop: threading.Event):

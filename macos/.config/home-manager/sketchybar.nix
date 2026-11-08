@@ -139,8 +139,10 @@ in
                      label.font="sketchybar-app-font:Regular:16.0" \
                      label.color=$COLOR \
                      label.drawing=off \
-                     background.drawing=off \
                      background.color=$SPACE_BG \
+                     background.corner_radius=6 \
+                     background.height=26 \
+                     background.drawing=off \
                      update_freq=0
       done
 
