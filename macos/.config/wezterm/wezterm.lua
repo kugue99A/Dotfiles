@@ -18,7 +18,7 @@ config.default_prog = { wezterm.home_dir .. "/.nix-profile/bin/fish" }
 config.enable_kitty_graphics = true
 
 config.window_decorations = "RESIZE"
-config.window_background_opacity = 0.01
+config.window_background_opacity = 0.05
 config.hide_tab_bar_if_only_one_tab = true
 
 -- Shared with the `theme` Fish command and Neovim.
