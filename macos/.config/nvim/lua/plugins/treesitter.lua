@@ -32,6 +32,23 @@ return {
 			"yaml",
 		}
 
+		-- `main` ブランチ (Neovim 0.12+) は install() を持つ。`master` ブランチ
+		-- (Neovim 0.11 系) には無いので、旧 API の configs.setup にフォールバックする。
+		if type(treesitter.install) ~= "function" then
+			require("nvim-treesitter.configs").setup({
+				ensure_installed = languages,
+				highlight = {
+					enable = true,
+					disable = function(_, buf)
+						local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+						return ok and stats and stats.size > 100 * 1024
+					end,
+				},
+				indent = { enable = true },
+			})
+			return
+		end
+
 		treesitter.setup({ install_dir = install_dir })
 		vim.opt.runtimepath:prepend(install_dir)
 

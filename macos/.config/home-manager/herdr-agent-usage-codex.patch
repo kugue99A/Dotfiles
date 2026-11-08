@@ -18,7 +18,7 @@ index 2193905..d319ac4 100644
  	// Newest-first: take the first rollout that carries a rate_limits snapshot.
  	// A just-opened session has session_meta but no token_count yet, so the
 @@ -244,8 +252,12 @@ func CollectCodexLimitsIn(home, providerID, label string, nowMs int64) ProviderL
- 			FetchedAtMs: nowMs,
+ 			FetchedAtMs: fetchedMs,
  		}
  		if age := minutesBetween(observedMs, nowMs); age > codexStaleAfterMinutes {
 -			note := "stale ~" + itoa(age) + "m ago"
